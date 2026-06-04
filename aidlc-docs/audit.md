@@ -119,3 +119,32 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: INCEPTION - Workflow Planning - revised plan approved; advancing to Application Design
 
 ---
+
+## Application Design — Plan Created
+**Timestamp**: 2026-06-04T01:10:00Z
+**User Input**: N/A (AI action)
+**AI Response**: "Created application-design-plan.md with 6 clarifying questions (backend module structure, S3 cache implementation, active-day definition, saved-layout scope, frontend data-fetching approach, comparison metrics set) plus execution checklist for components.md, component-methods.md, services.md, component-dependency.md, api-contract.md, application-design.md. Awaiting user answers before generating design artifacts."
+**Context**: INCEPTION - Application Design - plan + questions, awaiting answers (approval gate)
+
+---
+
+## Application Design — Plan Answers Received
+**Timestamp**: 2026-06-04T01:15:00Z
+**User Input**: "done" / "continue" (answers in application-design-plan.md): Q1=A (layered backend: api→services→core→repositories→models), Q2=B (SQLite-backed cache table), Q3=B (active day = Total_Messages>0 OR Chat_Conversations>0), Q4=C (layout persisted in browser localStorage only — refines FR-4.4.3, no backend layout storage), Q5=A (TanStack Query with polling), Q6=A (comparison metrics: AI Adoption, Total Messages, Chat Conversations, Credits Used, Active Days)
+**AI Response**: "Answers validated — all clear, no ambiguity. Noted Q4=C adjusts FR-4.4.3 (localStorage instead of SQLite for layout; no layout endpoint needed). Generating application design artifacts."
+**Context**: INCEPTION - Application Design - answers analyzed, proceeding to artifact generation
+
+---
+
+## Application Design — Artifacts Generated
+**Timestamp**: 2026-06-04T01:25:00Z
+**User Input**: "continue"
+**AI Response**: "Generated all 6 Application Design artifacts: components.md (12 backend components BE-1..BE-12 + 9 frontend FE-1..FE-9), component-methods.md (Python type-hinted signatures for all backend components + TS for frontend), services.md (AuthService, MetricsService, UserDirectoryService with orchestration flows), component-dependency.md (dependency matrix + deployment topology Docker Compose diagram), api-contract.md (10 REST endpoints with full request/response shapes), application-design.md (consolidated overview with traceability table). Q4=C (localStorage) noted — no backend layout endpoint. All plan checkboxes marked [x]."
+**Context**: INCEPTION - Application Design - generation complete, awaiting approval
+
+## Approval Prompt — Application Design
+**Timestamp**: 2026-06-04T01:25:00Z
+**AI Response (prompt to user)**: "Presented Application Design completion message. Awaiting explicit approval before proceeding to Units Generation."
+**Context**: INCEPTION - Application Design - approval gate
+
+---
