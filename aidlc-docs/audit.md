@@ -90,3 +90,24 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: INCEPTION - User Stories - approval gate
 
 ---
+
+## User Stories — User Approval
+**Timestamp**: 2026-06-04T00:55:00Z
+**User Input**: "Approve & Continue"
+**AI Response**: "User Stories approved. Proceeding to Workflow Planning stage."
+**Context**: INCEPTION - User Stories approved; advancing to Workflow Planning
+
+---
+
+## Workflow Planning — Plan Created
+**Timestamp**: 2026-06-04T01:00:00Z
+**User Input**: N/A (AI action)
+**AI Response**: "Created execution-plan.md: greenfield, medium-risk full-stack build. Decision — EXECUTE: Application Design, Units Generation, Functional Design, NFR Requirements, NFR Design, Infrastructure Design, Code Generation, Build and Test. SKIP: Reverse Engineering (greenfield). Included validated Mermaid workflow diagram + text alternative. Updated aidlc-state.md with execution plan summary."
+**Context**: INCEPTION - Workflow Planning - plan generated, awaiting approval
+
+## Approval Prompt — Workflow Planning
+**Timestamp**: 2026-06-04T01:00:00Z
+**AI Response (prompt to user)**: "Presented Workflow Planning completion message with recommended execute/skip stages and Request Changes / Add Skipped Stages / Approve & Continue options. Awaiting explicit approval."
+**Context**: INCEPTION - Workflow Planning - approval gate
+
+---
