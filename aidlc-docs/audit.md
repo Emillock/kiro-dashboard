@@ -111,3 +111,11 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: INCEPTION - Workflow Planning - approval gate
 
 ---
+
+## Workflow Planning — Change Request & Approval
+**Timestamp**: 2026-06-04T01:05:00Z
+**User Input**: "Request Changes - In construction phase skip first 4 stages" then "visualization wasn't updated" then "approved"
+**AI Response**: "Updated execution-plan.md to SKIP Functional Design, NFR Requirements, NFR Design, Infrastructure Design per user request. Documented PBT re-homing (PBT-01 property identification and PBT-09 framework selection now enforced at Code Generation Planning; frameworks locked: Hypothesis backend, fast-check frontend). Updated both the Mermaid diagram and the text-alternative to show the four stages as SKIPPED. Updated aidlc-state.md execution summary and Construction stage list. Plan APPROVED by user."
+**Context**: INCEPTION - Workflow Planning - revised plan approved; advancing to Application Design
+
+---

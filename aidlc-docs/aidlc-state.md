@@ -5,11 +5,11 @@
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-04T00:00:00Z
 - **Current Phase**: INCEPTION
-- **Current Stage**: Workflow Planning — COMPLETE (awaiting approval to proceed to Application Design)
+- **Current Stage**: Application Design — IN PROGRESS
 
 ## Execution Plan Summary
-- **Stages to Execute**: Application Design, Units Generation, Functional Design, NFR Requirements, NFR Design, Infrastructure Design, Code Generation, Build and Test
-- **Stages Skipped**: Reverse Engineering (greenfield)
+- **Stages to Execute**: Application Design, Units Generation, Code Generation, Build and Test
+- **Stages Skipped**: Reverse Engineering (greenfield); Functional Design, NFR Requirements, NFR Design, Infrastructure Design (per user request — folded into Application Design / Code Generation planning). PBT-01 & PBT-09 enforcement re-homed to Code Generation Planning.
 
 ## Workspace State
 - **Existing Code**: No
@@ -38,11 +38,14 @@
 - [x] Requirements Analysis - COMPLETED
 - [x] User Stories - COMPLETED
 - [x] Workflow Planning - COMPLETED
-- [ ] Application Design - EXECUTE (pending)
+- [ ] Application Design - EXECUTE (IN PROGRESS)
 - [ ] Units Generation - EXECUTE (pending)
 
 ### CONSTRUCTION PHASE
-- [ ] Per-Unit Design Stages - EXECUTE (Functional Design, NFR Requirements, NFR Design, Infrastructure Design)
+- [ ] Functional Design - SKIPPED (per user request)
+- [ ] NFR Requirements - SKIPPED (per user request)
+- [ ] NFR Design - SKIPPED (per user request)
+- [ ] Infrastructure Design - SKIPPED (per user request)
 - [ ] Code Generation - EXECUTE
 - [ ] Build and Test - EXECUTE
 

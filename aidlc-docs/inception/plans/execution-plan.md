@@ -42,10 +42,10 @@ flowchart TD
     end
 
     subgraph CONSTRUCTION["CONSTRUCTION PHASE"]
-        FD["Functional Design<br/><b>EXECUTE</b>"]
-        NFRA["NFR Requirements<br/><b>EXECUTE</b>"]
-        NFRD["NFR Design<br/><b>EXECUTE</b>"]
-        ID["Infrastructure Design<br/><b>EXECUTE</b>"]
+        FD["Functional Design<br/><b>SKIPPED</b>"]
+        NFRA["NFR Requirements<br/><b>SKIPPED</b>"]
+        NFRD["NFR Design<br/><b>SKIPPED</b>"]
+        ID["Infrastructure Design<br/><b>SKIPPED</b>"]
         CG["Code Generation<br/>Planning + Generation<br/><b>EXECUTE</b>"]
         BT["Build and Test<br/><b>EXECUTE</b>"]
     end
@@ -60,11 +60,7 @@ flowchart TD
     US --> WP
     WP --> AD
     AD --> UG
-    UG --> FD
-    FD --> NFRA
-    NFRA --> NFRD
-    NFRD --> ID
-    ID --> CG
+    UG --> CG
     CG --> BT
     BT --> OPS
     BT --> End(["Complete"])
@@ -78,10 +74,10 @@ flowchart TD
     style RE fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
     style AD fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
     style UG fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
-    style FD fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
-    style NFRA fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
-    style NFRD fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
-    style ID fill:#FFA726,stroke:#E65100,stroke-width:3px,stroke-dasharray: 5 5,color:#000
+    style FD fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+    style NFRA fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+    style NFRD fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+    style ID fill:#BDBDBD,stroke:#424242,stroke-width:2px,stroke-dasharray: 5 5,color:#000
     style OPS fill:#FFF59D,stroke:#F57F17,stroke-width:2px,stroke-dasharray: 5 5,color:#000
     style INCEPTION fill:#BBDEFB,stroke:#1565C0,stroke-width:3px,color:#000
     style CONSTRUCTION fill:#C8E6C9,stroke:#2E7D32,stroke-width:3px,color:#000
@@ -104,12 +100,12 @@ INCEPTION PHASE
 - Application Design .......... EXECUTE
 - Units Generation ............ EXECUTE
 
-CONSTRUCTION PHASE (per-unit loop, then build & test)
-- Functional Design ........... EXECUTE (per unit)
-- NFR Requirements ............ EXECUTE (per unit)
-- NFR Design .................. EXECUTE (per unit)
-- Infrastructure Design ....... EXECUTE (per unit)
-- Code Generation ............. EXECUTE (per unit, ALWAYS)
+CONSTRUCTION PHASE (Code Generation, then build & test)
+- Functional Design ........... SKIPPED (per user request)
+- NFR Requirements ............ SKIPPED (per user request)
+- NFR Design .................. SKIPPED (per user request)
+- Infrastructure Design ....... SKIPPED (per user request)
+- Code Generation ............. EXECUTE (per unit, ALWAYS; absorbs PBT-01 & PBT-09)
 - Build and Test .............. EXECUTE (ALWAYS)
 
 OPERATIONS PHASE
@@ -134,23 +130,47 @@ OPERATIONS PHASE
     construction manageable and lets each unit be designed and built coherently.
 
 ### 🟢 CONSTRUCTION PHASE (per-unit)
-- [ ] Functional Design — **EXECUTE** (per unit)
-  - **Rationale**: New data models (users, saved layouts) and non-trivial business logic
-    (dynamic CSV parsing, IDE+CLI combination, configurable AI Adoption weighted sum, top/bottom-N
-    selection) need detailed design. Also satisfies PBT-01 (property identification).
-- [ ] NFR Requirements — **EXECUTE** (per unit)
-  - **Rationale**: Performance/NRT targets, caching strategy, and tech-stack confirmation including
-    the **PBT framework selection** (Hypothesis, fast-check) per PBT-09 must be captured.
-- [ ] NFR Design — **EXECUTE** (per unit)
-  - **Rationale**: NRT polling + short-TTL caching patterns, auth/JWT handling, resilient-ingestion
-    patterns, and Kiro-styling design tokens need to be incorporated into the design.
-- [ ] Infrastructure Design — **EXECUTE** (per unit)
-  - **Rationale**: Docker Compose topology (frontend + backend), environment/secret passing, and
-    local volume for the SQLite DB must be specified. (Lightweight but needed.)
+- [ ] Functional Design — **SKIP** (per user request)
+  - **Rationale**: User elected to skip. Data models (users, saved layouts) and business-logic
+    design (dynamic CSV parsing, IDE+CLI combination, configurable AI Adoption weighted sum,
+    top/bottom-N selection) will instead be captured in **Application Design** and the
+    **Code Generation plan**. **PBT-01 (property identification)** is not dropped — it is enforced
+    at **Code Generation Planning** (which covers PBT-01 through PBT-10).
+- [ ] NFR Requirements — **SKIP** (per user request)
+  - **Rationale**: User elected to skip. NRT/perf targets and caching are already defined in
+    `requirements.md` (NFR-2). The **PBT framework selection (PBT-09)** — Hypothesis (backend),
+    fast-check (frontend) — is recorded here in this plan and will be enforced/confirmed at
+    **Code Generation Planning**.
+- [ ] NFR Design — **SKIP** (per user request)
+  - **Rationale**: User elected to skip. Polling/caching, JWT auth handling, resilient-ingestion
+    patterns, and Kiro design tokens will be applied directly during Code Generation, guided by the
+    requirements and stories.
+- [ ] Infrastructure Design — **SKIP** (per user request)
+  - **Rationale**: User elected to skip. Docker Compose topology (frontend + backend, `.env` secret
+    passing, SQLite volume) is straightforward and will be produced during Code Generation.
 - [ ] Code Generation — **EXECUTE** (ALWAYS, per unit)
-  - **Rationale**: Implementation planning and code generation for every unit.
+  - **Rationale**: Implementation planning and code generation for every unit. The Code Generation
+    **plan will include**: data model definitions, REST API contract, Docker Compose setup, and the
+    **full PBT property analysis + framework setup** (absorbing PBT-01 and PBT-09 from the skipped
+    stages).
 - [ ] Build and Test — **EXECUTE** (ALWAYS)
   - **Rationale**: Build all units; run example-based + property-based tests; integration checks.
+
+## PBT Coverage After Skipping Design Stages
+
+The Property-Based Testing extension remains **enabled (full)**. Because Functional Design and
+NFR Requirements are skipped, their PBT anchor rules are re-homed to Code Generation Planning:
+
+| PBT Rule | Normal anchor stage | New enforcement point |
+|---|---|---|
+| PBT-01 (property identification) | Functional Design (SKIPPED) | **Code Generation Planning** (already covers PBT-01..10) |
+| PBT-09 (framework selection) | NFR Requirements (SKIPPED) | Recorded in this plan; confirmed at **Code Generation Planning** |
+| PBT-02..08, PBT-10 | Code Generation | Code Generation (unchanged) |
+| PBT-08 (seed/CI) | Build and Test | Build and Test (unchanged) |
+
+**Decided PBT frameworks** (locked in here so nothing is lost by skipping NFR Requirements):
+- **Backend (Python/FastAPI)**: Hypothesis
+- **Frontend (TypeScript/React/Next.js)**: fast-check
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations — PLACEHOLDER (future deployment/monitoring workflows)
