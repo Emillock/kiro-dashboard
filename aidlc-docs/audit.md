@@ -148,3 +148,32 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: INCEPTION - Application Design - approval gate
 
 ---
+
+## Application Design — User Approval
+**Timestamp**: 2026-06-04T01:30:00Z
+**User Input**: "Approve & Continue"
+**AI Response**: "Application Design approved. Proceeding to Units Generation stage."
+**Context**: INCEPTION - Application Design approved; advancing to Units Generation
+
+---
+
+## Units Generation — Plan Created
+**Timestamp**: 2026-06-04T01:35:00Z
+**User Input**: N/A (AI action)
+**AI Response**: "Created unit-of-work-plan.md with 3 clarifying questions (unit granularity, repo directory structure, build sequence). Awaiting answers."
+**Context**: INCEPTION - Units Generation - Part 1 Planning, awaiting answers
+
+---
+
+## Units Generation — Complete
+**Timestamp**: 2026-06-04T01:45:00Z
+**User Input**: "done" (Q1=C four units, Q2=A backend/+frontend/ root, Q3=A data-first sequence)
+**AI Response**: "Generated unit-of-work.md (4 units: Data&Metrics, Auth&API, Frontend, Infrastructure; full directory structure per unit incl. PBT file list), unit-of-work-dependency.md (dependency matrix, integration contracts, build/parallelism diagram, failure isolation), unit-of-work-story-map.md (all 28 stories mapped; 0 unassigned). All plan checkboxes marked [x]. Updated aidlc-state.md (Units Generation COMPLETE). Awaiting approval."
+**Context**: INCEPTION - Units Generation - complete, awaiting approval
+
+## Approval Prompt — Units Generation
+**Timestamp**: 2026-06-04T01:45:00Z
+**AI Response (prompt to user)**: "Presented Units Generation completion message. Awaiting explicit approval to proceed to CONSTRUCTION PHASE."
+**Context**: INCEPTION - Units Generation - approval gate
+
+---
