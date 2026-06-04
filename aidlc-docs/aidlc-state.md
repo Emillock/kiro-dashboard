@@ -5,7 +5,7 @@
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-04T00:00:00Z
 - **Current Phase**: INCEPTION
-- **Current Stage**: Requirements Analysis
+- **Current Stage**: Requirements Analysis — COMPLETE (awaiting approval to proceed)
 
 ## Workspace State
 - **Existing Code**: No
@@ -21,14 +21,17 @@
 - **Structure patterns**: See code-generation.md Critical Rules
 
 ## Extension Configuration
-[Will be populated during Requirements Analysis based on opt-in responses]
+| Extension | Enabled | Mode | Decided At |
+|---|---|---|---|
+| Security Baseline | No | N/A | Requirements Analysis |
+| Property-Based Testing | Yes | Full (all PBT rules blocking) | Requirements Analysis |
 
 ## Stage Progress
 
 ### INCEPTION PHASE
 - [x] Workspace Detection - COMPLETED
 - [ ] Reverse Engineering - SKIPPED (greenfield)
-- [ ] Requirements Analysis - IN PROGRESS
+- [x] Requirements Analysis - COMPLETED
 - [ ] User Stories - PENDING
 - [ ] Workflow Planning - PENDING
 - [ ] Application Design - PENDING

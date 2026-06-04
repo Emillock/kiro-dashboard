@@ -150,7 +150,7 @@ B) Backend periodically ingests S3 files into the local database; API serves fro
 C) No preference — you choose (option A or B as appropriate)
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]: 
+[Answer]: A
 
 ## Question 13
 For the "last week / last month" time range selector on the main page, what should the default be?
