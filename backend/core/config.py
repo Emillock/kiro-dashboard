@@ -34,9 +34,14 @@ class Settings(BaseSettings):
     aws_access_key_id: str = Field(default="", validation_alias="AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str = Field(default="", validation_alias="AWS_SECRET_ACCESS_KEY")
     aws_default_region: str = Field(default="us-east-1", validation_alias="AWS_DEFAULT_REGION")
-    s3_bucket: str = Field(default="example-kiro-activity-bucket")
+    # Env-driven; placeholder defaults contain no organizational identifier.
+    s3_bucket: str = Field(
+        default="example-kiro-activity-bucket",
+        validation_alias="S3_BUCKET",
+    )
     s3_base_prefix: str = Field(
-        default="AWSLogs/000000000000/KiroLogs/user_report/us-east-1/"
+        default="AWSLogs/000000000000/KiroLogs/user_report/us-east-1/",
+        validation_alias="S3_BASE_PREFIX",
     )
 
     # --- Caching (Q2=B SQLite-backed cache; TTLs in seconds) ---
