@@ -4,8 +4,8 @@
 - **Project Name**: kiro-dashboard
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-04T00:00:00Z
-- **Current Phase**: INCEPTION
-- **Current Stage**: Units Generation — COMPLETE (awaiting approval to proceed to CONSTRUCTION PHASE)
+- **Current Phase**: CONSTRUCTION
+- **Current Stage**: Unit 1 (Data & Metrics) — Code Generation Part 1 (Planning)
 
 ## Execution Plan Summary
 - **Stages to Execute**: Application Design, Units Generation, Code Generation, Build and Test
