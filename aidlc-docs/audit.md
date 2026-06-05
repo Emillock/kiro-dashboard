@@ -303,3 +303,19 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: CONSTRUCTION - Unit 3 - code approval gate
 
 ---
+
+## Unit 3 Code Generation — User Approval
+**Timestamp**: 2026-06-04T04:05:00Z
+**User Input**: "Continue to Next Stage"
+**AI Response**: "Unit 3 approved. Advancing to Unit 4 (Infrastructure) Code Generation."
+**Context**: CONSTRUCTION - Unit 3 approved; advancing to Unit 4
+
+---
+
+## Unit 4 Infrastructure — Code Generation Complete
+**Timestamp**: 2026-06-04T04:15:00Z
+**User Input**: N/A (AI action)
+**AI Response**: "Generated Unit 4: backend/Dockerfile (Python 3.12-slim, uv, uvicorn), frontend/Dockerfile (Node 22 Alpine multi-stage, next standalone), docker-compose.yml (backend+frontend, named SQLite volume, healthcheck, env_file), .env.example (all config keys), README.md. Added output:standalone to next.config.ts. docker compose config --quiet passes. Documentation summary written. All 7 plan steps [x]."
+**Context**: CONSTRUCTION - Unit 4 - generation complete; all 4 units done; advancing to Build and Test
+
+---

@@ -1,0 +1,68 @@
+##############################################################################
+# Kiro NRT Dashboard — Docker Compose
+#
+# One-command startup:
+#   docker compose up --build
+#
+# Prerequisites:
+#   - Copy .env.example → .env and fill in real AWS credentials + JWT secret.
+#   - Docker Engine 24+ or Docker Desktop.
+##############################################################################
+
+services:
+
+  # ── Backend: FastAPI + SQLite ─────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: kiro-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # SQLite DB stored on a named volume (survives container restarts).
+      DATABASE_PATH: /app/data/kiro_dashboard.db
+      # The following can also be set in .env:
+      # CACHE_TTL_SECONDS: 300
+      # EMAIL_MAP_TTL_SECONDS: 86400
+      # REFRESH_INTERVAL_SECONDS: 180
+      # ADOPTION_WEIGHT_TOTAL_MESSAGES: 0.40
+      # ADOPTION_WEIGHT_CHAT_CONVERSATIONS: 0.30
+      # ADOPTION_WEIGHT_CREDITS_USED: 0.20
+      # ADOPTION_WEIGHT_ACTIVE_DAYS: 0.10
+    volumes:
+      - kiro_db:/app/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── Frontend: Next.js ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # At build time, point the frontend at the backend container name.
+        NEXT_PUBLIC_API_URL: http://backend:8000
+    container_name: kiro-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+##############################################################################
+# Named volume for the SQLite database (persists across `docker compose down`).
+# Use `docker compose down -v` to also remove the data.
+##############################################################################
+volumes:
+  kiro_db:
+    name: kiro_dashboard_db
