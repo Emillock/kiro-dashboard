@@ -57,53 +57,53 @@ realistic model-message maps) per PBT-07. Shrinking + seed logging per PBT-08.
 
 ## Generation Steps
 
-- [ ] **Step 1 — Project structure setup**
+- [x] **Step 1 — Project structure setup**
   - Create `backend/` skeleton: `core/`, `core/ingestion/`, `core/metrics/`, `models/`, `tests/unit/`.
   - Create `backend/pyproject.toml` (or `requirements.txt`) with: boto3, pydantic, pydantic-settings,
     python-dateutil, pytest, hypothesis. Add `backend/__init__.py` packages.
   - Create `backend/.python-version` / note uv usage.
 
-- [ ] **Step 2 — Config (`backend/core/config.py`)**
+- [x] **Step 2 — Config (`backend/core/config.py`)**
   - `Settings` (pydantic-settings) with all keys from component-methods.md (AWS, bucket/prefix,
     TTLs, adoption weights, refresh interval, JWT placeholder). Loads from env/`.env`.
   - *(US-DATA-01 credential plumbing finalized in Unit 2; config keys defined here.)*
 
-- [ ] **Step 3 — Models (`backend/models/metrics.py`)**
+- [x] **Step 3 — Models (`backend/models/metrics.py`)**
   - `UsageRecord`, `UserMetrics`, `AggregateMetrics`, `UserSummary`, `DailyTotal`.
 
-- [ ] **Step 4 — CSV Parser (`backend/core/ingestion/parser.py`)** — US-DATA-03
+- [x] **Step 4 — CSV Parser (`backend/core/ingestion/parser.py`)** — US-DATA-03
   - `discover_message_columns(header)`, `parse_report(csv_text) -> list[UsageRecord]`.
   - Dynamic columns, type coercion, missing→0, unknown columns ignored, utf-8-sig.
 
-- [ ] **Step 5 — S3 Client (`backend/core/ingestion/s3_client.py`)** — US-DATA-02
+- [x] **Step 5 — S3 Client (`backend/core/ingestion/s3_client.py`)** — US-DATA-02
   - `list_report_keys(start,end)`, `fetch_object_text(key)`, `list_all_keys()`. Tolerate missing days.
 
-- [ ] **Step 6 — Email Mapping (`backend/core/ingestion/email_map.py`)** — US-DATA-05
+- [x] **Step 6 — Email Mapping (`backend/core/ingestion/email_map.py`)** — US-DATA-05
   - `build_email_map()`, `resolve_label(user_id, email_map)`.
 
-- [ ] **Step 7 — Metrics Engine (`backend/core/metrics/aggregator.py`)** — US-METRIC-01, US-METRIC-02, US-DATA-04
+- [x] **Step 7 — Metrics Engine (`backend/core/metrics/aggregator.py`)** — US-METRIC-01, US-METRIC-02, US-DATA-04
   - `combine_records`, `compute_user_metrics`, `compute_aggregate_metrics`.
 
-- [ ] **Step 8 — AI Adoption (`backend/core/metrics/adoption.py`)** — US-METRIC-03
+- [x] **Step 8 — AI Adoption (`backend/core/metrics/adoption.py`)** — US-METRIC-03
   - `adoption_score`, `apply_scores`. Weights from config.
 
-- [ ] **Step 9 — Ranking/Selection (`backend/core/metrics/selection.py`)** — main page + comparison support
+- [x] **Step 9 — Ranking/Selection (`backend/core/metrics/selection.py`)** — main page + comparison support
   - `select_users(metric, mode, n)`, `top_adopters(k=5)`. Clamp n ≤ 20.
 
-- [ ] **Step 10 — PBT generators (`backend/tests/unit/generators.py`)** — PBT-07
+- [x] **Step 10 — PBT generators (`backend/tests/unit/generators.py`)** — PBT-07
   - Hypothesis strategies for `UsageRecord`, headers, weight dicts.
 
-- [ ] **Step 11 — Tests: parser** (`test_parser.py`) — example-based + PBT (US-NFR-06)
-- [ ] **Step 12 — Tests: aggregator** (`test_aggregator.py`) — example-based + PBT
-- [ ] **Step 13 — Tests: adoption** (`test_adoption.py`) — example-based + PBT
-- [ ] **Step 14 — Tests: selection** (`test_selection.py`) — example-based + PBT
-- [ ] **Step 15 — Tests: email_map** (`test_email_map.py`) — example-based
+- [x] **Step 11 — Tests: parser** (`test_parser.py`) — example-based + PBT (US-NFR-06)
+- [x] **Step 12 — Tests: aggregator** (`test_aggregator.py`) — example-based + PBT
+- [x] **Step 13 — Tests: adoption** (`test_adoption.py`) — example-based + PBT
+- [x] **Step 14 — Tests: selection** (`test_selection.py`) — example-based + PBT
+- [x] **Step 15 — Tests: email_map** (`test_email_map.py`) — example-based
   - Configure pytest + hypothesis (seed logging) in `backend/pyproject.toml`/`pytest.ini`.
 
-- [ ] **Step 16 — Documentation summary**
+- [x] **Step 16 — Documentation summary**
   - Write `aidlc-docs/construction/unit1-data-metrics/code/summary.md` (files created, PBT compliance).
 
-- [ ] **Step 17 — Verify** (tests executed in Build & Test, but smoke-run parser/metrics locally)
+- [x] **Step 17 — Verify** (tests executed: 40 passed in ~4.7s via backend/.venv)
 
 ---
 

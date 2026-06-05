@@ -198,3 +198,24 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: CONSTRUCTION - Unit 1 - plan approval gate
 
 ---
+
+## Unit 1 Code Generation Plan — User Approval
+**Timestamp**: 2026-06-04T02:00:00Z
+**User Input**: "Approve & Continue"
+**AI Response**: "Unit 1 code generation plan approved. Beginning Part 2 generation (backend/ Data & Metrics)."
+**Context**: CONSTRUCTION - Unit 1 - plan approved, starting generation
+
+---
+
+## Unit 1 Code Generation — Part 2 Generation Complete
+**Timestamp**: 2026-06-04T02:15:00Z
+**User Input**: "continue" / "create uv env with needed libraries and run commands using it instead of always using with tag. If env is needed only within backend create it there"
+**AI Response**: "Generated all Unit 1 code under backend/: config.py, models/metrics.py, core/ingestion/{parser,s3_client,email_map}.py, core/metrics/{aggregator,adoption,selection}.py, plus tests (generators.py + 5 test files). Created backend/.venv via uv and installed project with dev extras (uv pip install -e .[dev]). Fixed Hypothesis too_slow health check by lightening domain generators. Ran tests: 40 passed in ~4.7s. Wrote summary.md with PBT compliance (no blocking findings). Marked all 17 plan steps [x]. backend/.venv is git-ignored."
+**Context**: CONSTRUCTION - Unit 1 - generation complete & verified, awaiting approval
+
+## Approval Prompt — Unit 1 Code Generation
+**Timestamp**: 2026-06-04T02:15:00Z
+**AI Response (prompt to user)**: "Presented Unit 1 code generation completion message (2-option: Request Changes / Continue to Next Stage). Awaiting explicit approval."
+**Context**: CONSTRUCTION - Unit 1 - code approval gate
+
+---
