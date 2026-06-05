@@ -240,3 +240,24 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: CONSTRUCTION - Unit 2 - plan approval gate
 
 ---
+
+## Unit 2 Code Generation Plan — User Approval
+**Timestamp**: 2026-06-04T02:30:00Z
+**User Input**: "Approve & Continue"
+**AI Response**: "Unit 2 plan approved. Beginning Part 2 generation (auth, services, API routers, app factory, tests)."
+**Context**: CONSTRUCTION - Unit 2 - plan approved, starting generation
+
+---
+
+## Unit 2 Code Generation — Part 2 Generation Complete
+**Timestamp**: 2026-06-04T03:00:00Z
+**User Input**: "continue"
+**AI Response**: "Generated all Unit 2 code: DB layer, user/cache repos, bcrypt+JWT security, models, cache service, auth/metrics/user-dir services, 4 API routers, app factory. Fixed bcrypt 72-byte limit (truncate bytes), package import structure (pyproject.toml moved to repo root), Hypothesis deadline for bcrypt PBT, and test data min-length validation. 75 tests passing (40 Unit1 + 8 new unit + 18 integration + 1 xfail). Wrote Unit 2 summary. All 18 plan steps marked [x]."
+**Context**: CONSTRUCTION - Unit 2 - generation complete & verified, awaiting approval
+
+## Approval Prompt — Unit 2 Code Generation
+**Timestamp**: 2026-06-04T03:00:00Z
+**AI Response (prompt to user)**: "Presented Unit 2 code generation completion message (2-option: Request Changes / Continue to Next Stage). Awaiting explicit approval."
+**Context**: CONSTRUCTION - Unit 2 - code approval gate
+
+---

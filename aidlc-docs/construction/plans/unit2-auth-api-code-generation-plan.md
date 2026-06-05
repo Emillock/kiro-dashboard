@@ -63,52 +63,24 @@ token store in this iteration.)
 
 ## Generation Steps
 
-- [ ] **Step 1 — DB layer (`backend/repositories/db.py`)**
-  - SQLite connection helper; `init_db()` creating `users` + `metrics_cache` tables (idempotent).
-
-- [ ] **Step 2 — User repository (`backend/repositories/user_repo.py`)** — US-AUTH-01/02
-  - `create`, `get_by_email`, `get_by_username`, `get_by_id`.
-
-- [ ] **Step 3 — Cache repository (`backend/repositories/cache_repo.py`)** — Q2=B
-  - `read(key)`, `write(key, value_json, expires_at)`, `purge_expired()`.
-
-- [ ] **Step 4 — Security (`backend/core/auth/security.py`)** — US-AUTH-01..03
-  - bcrypt hash/verify, JWT create/decode, `get_current_user` dependency.
-
-- [ ] **Step 5 — Auth/user models (`backend/models/user.py`, `backend/models/auth.py`)**
-  - `UserRecord`, `UserCreate`, `UserOut`, `TokenData`, `LoginRequest`, `TokenResponse`.
-
-- [ ] **Step 6 — Cache service (`backend/core/cache/cache_service.py`)**
-  - `make_key`, `cache_get`, `cache_set`, `cache_invalidate` over CacheRepository (JSON serialize).
-
-- [ ] **Step 7 — Auth service (`backend/services/auth_service.py`)** — US-AUTH-01/02
-  - `register`, `login`, validation, conflict handling.
-
-- [ ] **Step 8 — Metrics service (`backend/services/metrics_service.py`)** — orchestrator
-  - Range calc (week/month), cache-first pipeline calling Unit 1; `get_aggregate_metrics`,
-    `get_user_metrics`, `list_users`, `get_top_adopters`, `get_comparison`, `get_email_map`.
-  - Resilient error handling (US-NFR-05).
-
-- [ ] **Step 9 — User directory service (`backend/services/user_dir_service.py`)** — US-IND-02
-  - `search_users(range, query)` over cached user list.
-
-- [ ] **Step 10 — API deps (`backend/api/deps.py`)**
-  - `get_settings`, `get_db`, `get_current_user`, service providers.
-
-- [ ] **Step 11 — Auth router (`backend/api/auth_router.py`)** — US-AUTH-01..04
-- [ ] **Step 12 — Metrics router (`backend/api/metrics_router.py`)** — serve metrics endpoints
-- [ ] **Step 13 — Config + health routers (`backend/api/config_router.py`, `health_router.py`)**
-- [ ] **Step 14 — App factory (`backend/main.py`)**
-  - Create FastAPI app, CORS, `init_db()` on startup, register routers under `/api/v1`.
-
-- [ ] **Step 15 — Unit tests** (`tests/unit/test_security.py`, `test_cache.py`) — example + PBT
-- [ ] **Step 16 — Integration tests** (`tests/integration/test_auth_api.py`, `test_metrics_api.py`)
-  - TestClient + temp SQLite; mock S3 (monkeypatch `S3IngestionClient`) for metrics endpoints.
-
-- [ ] **Step 17 — Documentation summary**
-  - `aidlc-docs/construction/unit2-auth-api/code/summary.md` (files, PBT compliance).
-
-- [ ] **Step 18 — Verify** — run full backend test suite via `backend/.venv`.
+- [x] **Step 1 — DB layer (`backend/repositories/db.py`)**
+- [x] **Step 2 — User repository (`backend/repositories/user_repo.py`)** — US-AUTH-01/02
+- [x] **Step 3 — Cache repository (`backend/repositories/cache_repo.py`)** — Q2=B
+- [x] **Step 4 — Security (`backend/core/auth/security.py`)** — US-AUTH-01..03
+- [x] **Step 5 — Auth/user models (`backend/models/user.py`, `backend/models/auth.py`)**
+- [x] **Step 6 — Cache service (`backend/core/cache/cache_service.py`)**
+- [x] **Step 7 — Auth service (`backend/services/auth_service.py`)** — US-AUTH-01/02
+- [x] **Step 8 — Metrics service (`backend/services/metrics_service.py`)** — orchestrator
+- [x] **Step 9 — User directory service (`backend/services/user_dir_service.py`)** — US-IND-02
+- [x] **Step 10 — API deps (`backend/api/deps.py`)**
+- [x] **Step 11 — Auth router (`backend/api/auth_router.py`)** — US-AUTH-01..04
+- [x] **Step 12 — Metrics router (`backend/api/metrics_router.py`)** — serve metrics endpoints
+- [x] **Step 13 — Config + health routers (`backend/api/config_router.py`, `health_router.py`)**
+- [x] **Step 14 — App factory (`backend/main.py`)**
+- [x] **Step 15 — Unit tests** (`tests/unit/test_security.py`, `test_cache.py`) — example + PBT
+- [x] **Step 16 — Integration tests** (`tests/integration/test_auth_api.py`, `test_metrics_api.py`)
+- [x] **Step 17 — Documentation summary**
+- [x] **Step 18 — Verify** — 75 tests passing via `backend/.venv`
 
 ---
 
