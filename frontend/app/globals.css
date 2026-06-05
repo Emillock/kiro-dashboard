@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Kiro IDE-like dark theme global styles
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --bg-deep:        #0d1117;
+  --bg-panel:       #161b22;
+  --bg-card:        #1c2128;
+  --bg-elevated:    #21262d;
+  --border:         #30363d;
+  --border-active:  #7c3aed;
+  --text-primary:   #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted:     #484f58;
+  --accent:         #7c3aed;
+  --accent-hover:   #6d28d9;
+  --accent-light:   #a78bfa;
+  --success:        #3fb950;
+  --warning:        #d29922;
+  --error:          #f85149;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-panel); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+a {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
