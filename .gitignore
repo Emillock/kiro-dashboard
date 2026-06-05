@@ -43,6 +43,9 @@ Thumbs.db
 .idea/
 .vscode/
 
+# Kiro IDE settings
+.kiro/settings/
+
 # Temp
 _tmp_*
 tmp/
