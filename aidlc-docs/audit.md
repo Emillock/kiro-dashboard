@@ -219,3 +219,24 @@ Q1=A (Python/FastAPI backend), Q2=B (React+TS+Next.js frontend), Q3=A (Recharts)
 **Context**: CONSTRUCTION - Unit 1 - code approval gate
 
 ---
+
+## Unit 1 Code Generation — User Approval
+**Timestamp**: 2026-06-04T02:20:00Z
+**User Input**: "Continue to Next Stage"
+**AI Response**: "Unit 1 approved. Marked Unit 1 Code Generation complete in aidlc-state.md. Beginning Unit 2 (Auth & API) Code Generation Part 1 (Planning)."
+**Context**: CONSTRUCTION - Unit 1 approved; advancing to Unit 2
+
+---
+
+## Unit 2 Code Generation — Part 1 (Planning)
+**Timestamp**: 2026-06-04T02:25:00Z
+**User Input**: N/A (AI action)
+**AI Response**: "Created unit2-auth-api-code-generation-plan.md: 18 steps (DB layer, user/cache repos, security bcrypt+JWT, auth/user models, cache service, auth/metrics/user-dir services, API deps, 4 routers, app factory, unit + integration tests, docs, verify). PBT catalogue for cache + security round-trips. Story traceability for 6 stories. Awaiting plan approval."
+**Context**: CONSTRUCTION - Unit 2 - Code Generation Part 1 Planning, awaiting approval
+
+## Approval Prompt — Unit 2 Code Generation Plan
+**Timestamp**: 2026-06-04T02:25:00Z
+**AI Response (prompt to user)**: "Presented Unit 2 plan summary (2-option). Awaiting explicit approval."
+**Context**: CONSTRUCTION - Unit 2 - plan approval gate
+
+---
