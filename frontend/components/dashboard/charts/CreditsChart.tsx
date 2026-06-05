@@ -26,10 +26,12 @@ export function CreditsChart({ data }: { data: DailyTotal[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-          <XAxis dataKey="date" tick={{ fill: colors.textMuted, fontSize: 10 }} />
-          <YAxis tick={{ fill: colors.textMuted, fontSize: 10 }} width={40} />
+          <XAxis dataKey="date" tick={{ fill: colors.textMuted, fontSize: 11 }} />
+          <YAxis tick={{ fill: colors.textMuted, fontSize: 11 }} width={40} />
           <Tooltip
             contentStyle={{ backgroundColor: colors.bgElevated, border: `1px solid ${colors.border}`, borderRadius: 6 }}
+            labelStyle={{ color: colors.textPrimary }}
+            itemStyle={{ color: colors.textPrimary }}
           />
           <Area type="monotone" dataKey="credits" stroke={colors.warning} fill="url(#creditsGradient)" strokeWidth={2} />
         </AreaChart>

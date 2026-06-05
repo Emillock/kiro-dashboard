@@ -175,3 +175,16 @@ export async function getRefreshInterval() {
     "/api/v1/config/refresh-interval"
   );
 }
+
+export interface AdoptionWeights {
+  total_messages: number;
+  chat_conversations: number;
+  credits_used: number;
+  active_days: number;
+}
+
+export async function getAdoptionWeights() {
+  return request<{ method: string; weights: AdoptionWeights }>(
+    "/api/v1/config/adoption-weights"
+  );
+}

@@ -47,12 +47,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # At build time, point the frontend at the backend container name.
-        NEXT_PUBLIC_API_URL: http://backend:8000
+        # NEXT_PUBLIC_* values are inlined at build time and run in the BROWSER,
+        # so this URL must be reachable from the host — not the Docker-internal
+        # service name (the browser can't resolve "backend").
+        NEXT_PUBLIC_API_URL: http://localhost:8000
     container_name: kiro-frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
     ports:
       - "3000:3000"
     depends_on:

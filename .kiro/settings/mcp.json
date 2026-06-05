@@ -1,4 +1,20 @@
 {
   "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "autoApprove": [
+        "browser_navigate",
+        "browser_snapshot",
+        "browser_take_screenshot",
+        "browser_resize",
+        "browser_evaluate",
+        "browser_close",
+        "browser_click",
+        "browser_run_code_unsafe"
+      ]
+    }
   }
 }

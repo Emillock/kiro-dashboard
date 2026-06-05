@@ -18,6 +18,7 @@ import { MessagesOverTime } from "@/components/dashboard/charts/MessagesOverTime
 import { ModelDistribution } from "@/components/dashboard/charts/ModelDistribution";
 import { CreditsChart } from "@/components/dashboard/charts/CreditsChart";
 import { ActiveUsersChart } from "@/components/dashboard/charts/ActiveUsersChart";
+import { RangeToggle } from "@/components/common/RangeToggle";
 import { colors } from "@/styles/theme";
 
 const BLOCK_TITLES: Record<string, string> = {
@@ -82,31 +83,7 @@ export default function DashboardPage() {
         </h1>
 
         {/* Time range selector (US-MAIN-01) */}
-        <div
-          role="group"
-          aria-label="Time range"
-          style={{ display: "flex", gap: 4 }}
-        >
-          {(["week", "month"] as RangeParam[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              aria-pressed={range === r}
-              data-testid={`range-${r}`}
-              style={{
-                padding: "6px 14px",
-                border: `1px solid ${range === r ? colors.accent : colors.border}`,
-                borderRadius: 6,
-                backgroundColor: range === r ? colors.accentBg : "transparent",
-                color: range === r ? colors.accentLight : colors.textSecondary,
-                fontSize: 12,
-                fontWeight: range === r ? 600 : 400,
-              }}
-            >
-              {r === "week" ? "Last 7 days" : "Last 30 days"}
-            </button>
-          ))}
-        </div>
+        <RangeToggle range={range} onChange={setRange} />
       </div>
 
       {aggLoading && (

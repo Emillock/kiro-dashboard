@@ -20,10 +20,12 @@ export function ActiveUsersChart({ data }: { data: DailyTotal[] }) {
       <ResponsiveContainer width="100%" height={160}>
         <BarChart data={formatted} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-          <XAxis dataKey="date" tick={{ fill: colors.textMuted, fontSize: 10 }} />
-          <YAxis tick={{ fill: colors.textMuted, fontSize: 10 }} width={30} allowDecimals={false} />
+          <XAxis dataKey="date" tick={{ fill: colors.textMuted, fontSize: 11 }} />
+          <YAxis tick={{ fill: colors.textMuted, fontSize: 11 }} width={30} allowDecimals={false} />
           <Tooltip
             contentStyle={{ backgroundColor: colors.bgElevated, border: `1px solid ${colors.border}`, borderRadius: 6 }}
+            labelStyle={{ color: colors.textPrimary }}
+            itemStyle={{ color: colors.textPrimary }}
           />
           <Bar dataKey="users" fill={colors.success} radius={[3, 3, 0, 0]} />
         </BarChart>

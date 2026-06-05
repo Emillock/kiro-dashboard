@@ -1,5 +1,6 @@
 import { colors } from "@/styles/theme";
 import type { TopAdopter } from "@/lib/api";
+import { AdoptionScoreInfo } from "@/components/common/AdoptionScoreInfo";
 
 const RANK_BORDERS: Record<number, string> = {
   1: colors.gold,
@@ -22,8 +23,9 @@ export function TopAdoptersPodium({ adopters }: { adopters: TopAdopter[] }) {
 
   return (
     <div>
-      <p style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 12, fontWeight: 600 }}>
+      <p style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
         Top Adopters by AI Adoption Score
+        <AdoptionScoreInfo />
       </p>
       <ol role="list" style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
         {adopters.map((a) => {

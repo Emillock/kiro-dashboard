@@ -16,3 +16,19 @@ def refresh_interval(
     _user: UserOut = Depends(get_current_user),
 ) -> dict:
     return {"refresh_interval_seconds": settings.refresh_interval_seconds}
+
+
+@router.get("/adoption-weights")
+def adoption_weights(
+    settings: Settings = Depends(get_settings_dep),
+    _user: UserOut = Depends(get_current_user),
+) -> dict:
+    """Expose the configured AI Adoption score weights so the UI can explain the formula.
+
+    The score is an absolute weighted sum of per-user metrics (FR-3.3.1); a missing
+    metric contributes 0 (FR-3.3.2).
+    """
+    return {
+        "method": "weighted_sum",
+        "weights": settings.adoption_weights,
+    }

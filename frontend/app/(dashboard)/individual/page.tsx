@@ -7,12 +7,14 @@ import { StatCards } from "@/components/dashboard/StatCards";
 import { MessagesOverTime } from "@/components/dashboard/charts/MessagesOverTime";
 import { ModelDistribution } from "@/components/dashboard/charts/ModelDistribution";
 import { Card } from "@/components/common/Card";
+import { AdoptionScoreInfo } from "@/components/common/AdoptionScoreInfo";
+import { RangeToggle } from "@/components/common/RangeToggle";
 import { colors } from "@/styles/theme";
 import type { RangeParam } from "@/lib/api";
 import type { AggregateMetrics } from "@/lib/api";
 
 export default function IndividualPage() {
-  const [range] = useState<RangeParam>("month");
+  const [range, setRange] = useState<RangeParam>("month");
   const [selectedUserId, setSelectedUserId] = useState("");
 
   const { data: usersData, isLoading: usersLoading } = useUsers(range);
@@ -37,9 +39,12 @@ export default function IndividualPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary, marginBottom: 24 }}>
-        Individual Metrics
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary }}>
+          Individual Metrics
+        </h1>
+        <RangeToggle range={range} onChange={setRange} />
+      </div>
 
       {usersLoading ? (
         <p style={{ color: colors.textSecondary, fontSize: 13 }}>Loading users…</p>
@@ -64,13 +69,13 @@ export default function IndividualPage() {
                 <p style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 8 }}>
                   Showing metrics for: <strong style={{ color: colors.accentLight }}>{userMetrics?.label}</strong>
                 </p>
-                <StatCards data={statData} />
+                <StatCards data={statData} variant="individual" />
               </div>
 
               {/* Charts */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <Card>
-                  <MessagesOverTime data={statData.daily_totals} />
+                  <MessagesOverTime data={statData.daily_totals} showActiveUsers={false} />
                 </Card>
                 <Card>
                   <ModelDistribution data={statData.model_distribution} />
@@ -85,11 +90,12 @@ export default function IndividualPage() {
                     {userMetrics?.subscription_tier ?? "Unknown"}
                   </strong>
                 </span>
-                <span style={{ fontSize: 12, color: colors.textSecondary }}>
+                <span style={{ fontSize: 12, color: colors.textSecondary, display: "inline-flex", alignItems: "center", gap: 6 }}>
                   AI Adoption Score:{" "}
                   <strong style={{ color: colors.accentLight }}>
                     {userMetrics?.adoption_score.toFixed(1)}
                   </strong>
+                  <AdoptionScoreInfo />
                 </span>
               </Card>
             </div>

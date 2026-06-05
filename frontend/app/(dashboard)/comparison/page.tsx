@@ -7,6 +7,8 @@ import {
 } from "recharts";
 import { useComparison } from "@/lib/queries";
 import { colors } from "@/styles/theme";
+import { AdoptionScoreInfo } from "@/components/common/AdoptionScoreInfo";
+import { RangeToggle } from "@/components/common/RangeToggle";
 import type { MetricKey, SelectionMode, RangeParam } from "@/lib/api";
 
 const METRIC_OPTIONS: { value: MetricKey; label: string }[] = [
@@ -28,7 +30,7 @@ export default function ComparisonPage() {
   const [metric, setMetric] = useState<MetricKey>("adoption_score");
   const [mode, setMode]   = useState<SelectionMode>("top_n");
   const [n, setN]         = useState(10);
-  const [range]           = useState<RangeParam>("month");
+  const [range, setRange]           = useState<RangeParam>("month");
 
   const needsN = mode === "top_n" || mode === "bottom_n";
   const effectiveN = needsN ? Math.min(Math.max(1, n), 20) : undefined;
@@ -44,9 +46,12 @@ export default function ComparisonPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary, marginBottom: 24 }}>
-        User Comparison
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary }}>
+          User Comparison
+        </h1>
+        <RangeToggle range={range} onChange={setRange} />
+      </div>
 
       {/* Controls */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 28, alignItems: "flex-end" }}>
@@ -132,9 +137,10 @@ export default function ComparisonPage() {
             padding: 20,
           }}
         >
-          <p style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 16, fontWeight: 600 }}>
+          <p style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 16, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
             {selectedMetricLabel} — {MODE_OPTIONS.find((m) => m.value === mode)?.label}
             {needsN ? ` (top ${effectiveN})` : ""}
+            {metric === "adoption_score" && <AdoptionScoreInfo />}
           </p>
           <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 36)}>
             <BarChart
@@ -157,6 +163,8 @@ export default function ComparisonPage() {
                   borderRadius: 6,
                   fontSize: 12,
                 }}
+                labelStyle={{ color: colors.textPrimary }}
+                itemStyle={{ color: colors.textPrimary }}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartData.map((_, i) => (

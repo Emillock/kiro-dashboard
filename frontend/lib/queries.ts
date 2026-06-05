@@ -22,6 +22,15 @@ export function useRefreshInterval() {
   return data ? data.refresh_interval_seconds * 1000 : DEFAULT_REFRESH_MS;
 }
 
+/** Fetch the configured AI Adoption score weights (rarely change). */
+export function useAdoptionWeights() {
+  return useQuery({
+    queryKey: ["config", "adoption-weights"],
+    queryFn: () => api.getAdoptionWeights(),
+    staleTime: 5 * 60_000,
+  });
+}
+
 export function useAggregateMetrics(range: RangeParam = "month") {
   const refetchInterval = useRefreshInterval();
   return useQuery({

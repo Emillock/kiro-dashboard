@@ -20,9 +20,9 @@ export const colors = {
   /** Primary text (high contrast) */
   textPrimary: "#e6edf3",
   /** Secondary text (subtitles, captions) */
-  textSecondary: "#8b949e",
+  textSecondary: "#9aa4af",
   /** Muted text (placeholders, disabled) */
-  textMuted: "#484f58",
+  textMuted: "#7d8590",
 
   /** Primary accent — violet */
   accent: "#7c3aed",
