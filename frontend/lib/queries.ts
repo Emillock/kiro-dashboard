@@ -2,24 +2,38 @@
 
 /**
  * TanStack Query (React Query) hooks for all backend data endpoints.
- * The refetchInterval drives NRT auto-refresh (US-NRT-01).
+ *
+ * Data is pulled from S3 once a day by the backend scheduler and stored locally, so the
+ * frontend does NOT poll: refetchInterval is driven by the backend config and is disabled
+ * (0) by default. Queries simply read the local snapshot on mount / range change.
  */
 
 import { useQuery } from "@tanstack/react-query";
 import * as api from "./api";
 import type { MetricKey, RangeParam, SelectionMode } from "./api";
 
-// Default refresh interval in ms — overridden by backend config.
-const DEFAULT_REFRESH_MS = 3 * 60 * 1000; // 3 minutes
-
-/** Fetch the backend-configured refresh interval (once on mount). */
-export function useRefreshInterval() {
+/**
+ * Fetch the backend-configured refresh interval (ms). Returns `false` when polling is
+ * disabled (interval = 0), which TanStack Query treats as "no auto-refetch".
+ */
+export function useRefreshInterval(): number | false {
   const { data } = useQuery({
     queryKey: ["config", "refresh-interval"],
     queryFn: () => api.getRefreshInterval(),
     staleTime: 60_000,
   });
-  return data ? data.refresh_interval_seconds * 1000 : DEFAULT_REFRESH_MS;
+  const seconds = data?.refresh_interval_seconds ?? 0;
+  return seconds > 0 ? seconds * 1000 : false;
+}
+
+/** Whether the backend has auth disabled (login not required). */
+export function useAuthConfig() {
+  return useQuery({
+    queryKey: ["config", "auth"],
+    queryFn: () => api.getAuthConfig(),
+    staleTime: 5 * 60_000,
+    retry: 0,
+  });
 }
 
 /** Fetch the configured AI Adoption score weights (rarely change). */

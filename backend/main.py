@@ -14,14 +14,19 @@ from backend.api.auth_router import router as auth_router
 from backend.api.config_router import router as config_router
 from backend.api.health_router import router as health_router
 from backend.api.metrics_router import router as metrics_router
+from backend.core.scheduler import shutdown_scheduler, start_scheduler
 from backend.repositories.db import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialise the SQLite schema on startup (idempotent)."""
+    """Initialise the SQLite schema and start the daily refresh scheduler on startup."""
     init_db()
-    yield
+    start_scheduler()
+    try:
+        yield
+    finally:
+        shutdown_scheduler()
 
 
 def create_app() -> FastAPI:

@@ -62,11 +62,12 @@ class MetricsService:
         self._s3 = s3_client or S3IngestionClient(self._settings)
 
     # --- email mapping (longer TTL) ---
-    def get_email_map(self) -> dict[str, str]:
+    def get_email_map(self, force: bool = False) -> dict[str, str]:
         key = make_key("email_map", "v1")
-        cached = self._cache.get(key)
-        if cached is not None:
-            return cached
+        if not force:
+            cached = self._cache.get(key)
+            if cached is not None:
+                return cached
         try:
             mapping = build_email_map(self._s3)
         except Exception as exc:  # noqa: BLE001 - resilient ingestion (US-NFR-05)
@@ -152,3 +153,35 @@ class MetricsService:
     ) -> list[UserMetrics]:
         users = self._cached_user_metrics(range_label)
         return select_users(users, metric, mode, n)
+
+    # --- daily refresh (scheduled) ---
+    def refresh_all(self) -> dict[str, int]:
+        """Pull all data from S3 and rebuild the local snapshot for every range.
+
+        Called by the daily scheduler (and once on startup). Forces a fresh S3 read,
+        rebuilds the UserId->email map, recomputes per-user + aggregate metrics, and
+        overwrites the cache with the long snapshot TTL. Returns a small summary.
+        """
+        summary: dict[str, int] = {}
+        # Rebuild the email map first so freshly computed metrics get correct labels.
+        email_map = self.get_email_map(force=True)
+        summary["email_map_entries"] = len(email_map)
+
+        for range_label in sorted(VALID_RANGES):
+            try:
+                users, records, start, end = self._load_user_metrics(range_label)
+                agg = compute_aggregate_metrics(users, records, range_label, start, end)
+                ukey = make_key("users", range_label, start.isoformat(), end.isoformat())
+                akey = make_key("aggregate", range_label, start.isoformat(), end.isoformat())
+                self._cache.set(
+                    ukey,
+                    [u.model_dump(mode="json") for u in users],
+                    self._settings.cache_ttl_seconds,
+                )
+                self._cache.set(akey, agg.model_dump(mode="json"), self._settings.cache_ttl_seconds)
+                summary[f"{range_label}_users"] = len(users)
+                logger.info("Daily refresh: range=%s users=%d", range_label, len(users))
+            except MetricsError as exc:
+                logger.error("Daily refresh failed for range %s: %s", range_label, exc)
+                summary[f"{range_label}_users"] = -1
+        return summary

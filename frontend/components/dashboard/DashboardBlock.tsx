@@ -2,6 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Lock, Unlock } from "lucide-react";
 import { colors, radii, shadows } from "@/styles/theme";
 
 interface DashboardBlockProps {
@@ -35,6 +36,7 @@ export function DashboardBlock({
       data-testid={`block-${id}`}
     >
       <div
+        className="neon-hover"
         style={{
           backgroundColor: colors.bgCard,
           border: `1px solid ${colors.border}`,
@@ -66,9 +68,9 @@ export function DashboardBlock({
           >
             <span
               aria-hidden="true"
-              style={{ color: colors.textMuted, fontSize: 14 }}
+              style={{ color: colors.textMuted, display: "inline-flex" }}
             >
-              ⠿
+              <GripVertical size={16} strokeWidth={2} />
             </span>
             {title && (
               <span style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary }}>
@@ -86,12 +88,13 @@ export function DashboardBlock({
               background: "none",
               border: "none",
               cursor: "pointer",
-              fontSize: 14,
+              display: "inline-flex",
+              alignItems: "center",
               color: locked ? colors.accentLight : colors.textMuted,
               padding: "2px 4px",
             }}
           >
-            {locked ? "🔒" : "🔓"}
+            {locked ? <Lock size={15} strokeWidth={2} /> : <Unlock size={15} strokeWidth={2} />}
           </button>
         </div>
 
