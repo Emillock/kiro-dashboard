@@ -1,3 +1,4 @@
+import { Trophy, Medal, Award } from "lucide-react";
 import { colors } from "@/styles/theme";
 import type { TopAdopter } from "@/lib/api";
 import { AdoptionScoreInfo } from "@/components/common/AdoptionScoreInfo";
@@ -9,9 +10,15 @@ const RANK_BORDERS: Record<number, string> = {
 };
 
 const RANK_LABELS: Record<number, string> = {
-  1: "🥇 1st",
-  2: "🥈 2nd",
-  3: "🥉 3rd",
+  1: "1st",
+  2: "2nd",
+  3: "3rd",
+};
+
+const RANK_ICONS: Record<number, typeof Trophy> = {
+  1: Trophy,
+  2: Medal,
+  3: Award,
 };
 
 export function TopAdoptersPodium({ adopters }: { adopters: TopAdopter[] }) {
@@ -30,11 +37,13 @@ export function TopAdoptersPodium({ adopters }: { adopters: TopAdopter[] }) {
       <ol role="list" style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
         {adopters.map((a) => {
           const borderColor = RANK_BORDERS[a.rank] ?? colors.border;
-          const rankLabel = RANK_LABELS[a.rank] ?? `#${a.rank}`;
+          const RankIcon: typeof Trophy | undefined = RANK_ICONS[a.rank];
+          const rankLabel = RANK_LABELS[a.rank];
           return (
             <li
               key={a.user_id}
               data-testid={`top-adopter-rank-${a.rank}`}
+              className={a.rank === 1 ? "neon-glow" : undefined}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -48,13 +57,23 @@ export function TopAdoptersPodium({ adopters }: { adopters: TopAdopter[] }) {
               <span
                 aria-label={`Rank ${a.rank}`}
                 style={{
-                  minWidth: 40,
+                  minWidth: 48,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
                   fontSize: 13,
                   fontWeight: 700,
                   color: borderColor,
                 }}
               >
-                {rankLabel}
+                {RankIcon ? (
+                  <>
+                    <RankIcon size={16} strokeWidth={2.2} aria-hidden="true" />
+                    {rankLabel}
+                  </>
+                ) : (
+                  <span aria-hidden="true">{`#${a.rank}`}</span>
+                )}
               </span>
               <span style={{ flex: 1, fontSize: 13, color: colors.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {a.label}

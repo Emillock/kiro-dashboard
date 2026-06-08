@@ -56,6 +56,7 @@ export default function LoginPage() {
             marginBottom: 24,
             color: colors.textPrimary,
           }}
+          className="neon-text"
         >
           Sign in to Kiro Dashboard
         </h1>
@@ -106,6 +107,7 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             data-testid="login-submit-button"
+            className="neon-btn"
             style={{
               width: "100%",
               padding: "10px 0",

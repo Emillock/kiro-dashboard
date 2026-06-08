@@ -35,6 +35,8 @@ services:
       - kiro_db:/app/data
     ports:
       - "8000:8000"
+    networks:
+      - dev_network
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
       interval: 30s
@@ -57,6 +59,8 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:8000
     ports:
       - "3000:3000"
+    networks:
+      - dev_network
     depends_on:
       backend:
         condition: service_healthy
@@ -68,3 +72,11 @@ services:
 volumes:
   kiro_db:
     name: kiro_dashboard_db
+
+##############################################################################
+# Shared bridge network for inter-service communication.
+##############################################################################
+networks:
+  dev_network:
+    name: dev_network
+    driver: bridge

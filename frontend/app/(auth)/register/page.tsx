@@ -56,7 +56,7 @@ export default function RegisterPage() {
           borderRadius: 8,
         }}
       >
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24, color: colors.textPrimary }}>
+        <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24, color: colors.textPrimary }} className="neon-text">
           Create an account
         </h1>
 
@@ -97,6 +97,7 @@ export default function RegisterPage() {
             type="submit"
             disabled={loading}
             data-testid="register-submit-button"
+            className="neon-btn"
             style={{
               width: "100%",
               padding: "10px 0",

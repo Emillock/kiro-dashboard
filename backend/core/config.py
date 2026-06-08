@@ -45,11 +45,27 @@ class Settings(BaseSettings):
     )
 
     # --- Caching (Q2=B SQLite-backed cache; TTLs in seconds) ---
-    cache_ttl_seconds: int = Field(default=300)          # short TTL for metric data
-    email_map_ttl_seconds: int = Field(default=86400)    # longer TTL for email mapping
+    # Data is pulled from S3 once a day by the scheduler and stored locally, so the
+    # snapshot TTL is intentionally long (36h) — it outlives a full day so requests are
+    # always served from the local store between daily refreshes (no per-request S3 pulls).
+    cache_ttl_seconds: int = Field(default=129600)       # 36h snapshot TTL for metric data
+    email_map_ttl_seconds: int = Field(default=129600)   # 36h TTL for email mapping
+
+    # --- Daily refresh schedule (data lands in S3 at 06:00; we pull at 07:00 Baku) ---
+    daily_refresh_enabled: bool = Field(default=True, validation_alias="DAILY_REFRESH_ENABLED")
+    daily_refresh_hour: int = Field(default=7, validation_alias="DAILY_REFRESH_HOUR")
+    daily_refresh_minute: int = Field(default=0, validation_alias="DAILY_REFRESH_MINUTE")
+    daily_refresh_timezone: str = Field(
+        default="Asia/Baku", validation_alias="DAILY_REFRESH_TIMEZONE"
+    )
 
     # --- NRT ---
-    refresh_interval_seconds: int = Field(default=180)   # frontend polling hint (NFR-2.1)
+    # 0 disables frontend auto-refresh (data only changes on the daily server-side pull).
+    refresh_interval_seconds: int = Field(default=0, validation_alias="REFRESH_INTERVAL_SECONDS")
+
+    # --- Auth toggle ---
+    # When true, all auth is bypassed (no login required). Use only for trusted/internal deploys.
+    auth_disabled: bool = Field(default=False, validation_alias="AUTH_DISABLED")
 
     # --- AI Adoption weights (configurable, FR-3.3.1) ---
     adoption_weight_total_messages: float = Field(default=DEFAULT_ADOPTION_WEIGHTS["total_messages"])

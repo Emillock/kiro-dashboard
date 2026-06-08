@@ -176,6 +176,11 @@ export async function getRefreshInterval() {
   );
 }
 
+/** Public: whether the backend has auth disabled (no token needed to call this). */
+export async function getAuthConfig() {
+  return request<{ auth_disabled: boolean }>("/api/v1/config/auth");
+}
+
 export interface AdoptionWeights {
   total_messages: number;
   chat_conversations: number;
