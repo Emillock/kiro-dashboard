@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { Info } from "lucide-react";
 import { useAdoptionWeights } from "@/lib/queries";
 import type { AdoptionWeights } from "@/lib/api";
 import { colors } from "@/styles/theme";
@@ -51,21 +52,20 @@ export function AdoptionScoreInfo() {
         data-testid="adoption-score-info"
         onClick={() => setOpen((v) => !v)}
         style={{
-          width: 16,
-          height: 16,
-          lineHeight: "16px",
+          width: 18,
+          height: 18,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
           padding: 0,
           borderRadius: "50%",
           border: `1px solid ${colors.border}`,
           backgroundColor: open ? colors.accentBg : "transparent",
           color: open ? colors.accentLight : colors.textSecondary,
-          fontSize: 11,
-          fontWeight: 700,
           cursor: "pointer",
-          textAlign: "center",
         }}
       >
-        i
+        <Info size={12} strokeWidth={2.2} aria-hidden="true" />
       </button>
 
       {open && (

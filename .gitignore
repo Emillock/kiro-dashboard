@@ -49,3 +49,6 @@ Thumbs.db
 # Temp
 _tmp_*
 tmp/
+
+# Playwright MCP (browser snapshots/screenshots from automation)
+.playwright-mcp/

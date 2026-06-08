@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useAuthConfig } from "@/lib/queries";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { colors } from "@/styles/theme";
 
@@ -12,16 +13,22 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { isAuthenticated } = useAuth();
+  const { data: authConfig, isLoading: authLoading } = useAuthConfig();
   const router = useRouter();
 
-  // Auth guard: redirect to /login if not authenticated (US-AUTH-03).
+  const authDisabled = authConfig?.auth_disabled ?? false;
+  const allowed = authDisabled || isAuthenticated;
+
+  // Auth guard: redirect to /login if auth is enabled and the user isn't authenticated.
+  // While the auth-config is still loading we wait, so we don't bounce users when auth is off.
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!authLoading && !allowed) {
       router.push("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [authLoading, allowed, router]);
 
-  if (!isAuthenticated) return null;
+  if (authLoading) return null;
+  if (!allowed) return null;
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: colors.bgDeep }}>

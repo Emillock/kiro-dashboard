@@ -73,3 +73,52 @@ button {
   cursor: pointer;
   font-family: inherit;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Neon accent utilities (balanced — subtle violet glow)
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --neon: 124, 58, 237;          /* accent violet, as RGB triplet */
+  --neon-cyan: 88, 166, 255;
+}
+
+/* Soft glowing text for the logo and key headings. */
+.neon-text {
+  text-shadow:
+    0 0 4px rgba(var(--neon), 0.45),
+    0 0 12px rgba(var(--neon), 0.30);
+}
+
+/* Subtle outer glow for elevated surfaces / highlighted blocks. */
+.neon-glow {
+  box-shadow:
+    0 0 0 1px rgba(var(--neon), 0.25),
+    0 0 14px rgba(var(--neon), 0.12);
+}
+
+/* Glow that intensifies on hover — used on cards and interactive blocks. */
+.neon-hover {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.neon-hover:hover {
+  border-color: rgba(var(--neon), 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--neon), 0.30),
+    0 0 16px rgba(var(--neon), 0.16);
+}
+
+/* Accent buttons get a gentle glow so primary actions pop without shouting. */
+.neon-btn {
+  box-shadow: 0 0 12px rgba(var(--neon), 0.35);
+  transition: box-shadow 0.2s ease, filter 0.2s ease;
+}
+.neon-btn:hover:not(:disabled) {
+  box-shadow: 0 0 18px rgba(var(--neon), 0.55);
+  filter: brightness(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-hover,
+  .neon-btn { transition: none; }
+}

@@ -10,6 +10,15 @@ from backend.models.user import UserOut
 router = APIRouter(prefix="/config", tags=["config"])
 
 
+@router.get("/auth")
+def auth_config(settings: Settings = Depends(get_settings_dep)) -> dict:
+    """Public endpoint: tells the frontend whether login is required.
+
+    No auth required (the frontend must read this before it can know whether to log in).
+    """
+    return {"auth_disabled": settings.auth_disabled}
+
+
 @router.get("/refresh-interval")
 def refresh_interval(
     settings: Settings = Depends(get_settings_dep),

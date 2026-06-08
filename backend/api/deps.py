@@ -50,7 +50,15 @@ def get_current_user(
     authorization: str | None = Header(default=None),
     conn: sqlite3.Connection = Depends(get_db),
 ) -> UserOut:
-    """Resolve the current user from a Bearer JWT (US-AUTH-03). 401 if missing/invalid."""
+    """Resolve the current user from a Bearer JWT (US-AUTH-03). 401 if missing/invalid.
+
+    When ``AUTH_DISABLED`` is set, authentication is bypassed entirely and a synthetic
+    user is returned (for trusted/internal deploys only).
+    """
+    settings = get_settings()
+    if settings.auth_disabled:
+        return UserOut(id=0, email="auth-disabled@local", username="guest")
+
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

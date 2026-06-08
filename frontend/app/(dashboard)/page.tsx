@@ -78,7 +78,7 @@ export default function DashboardPage() {
     <div>
       {/* Header row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary }} className="neon-text">
           Overview
         </h1>
 
