@@ -23,10 +23,16 @@ export function ModelDistribution({ data }: { data: Record<string, number> }) {
       {chartData.length === 0 ? (
         <p style={{ fontSize: 12, color: colors.textMuted }}>No model data available.</p>
       ) : (
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 16, left: 92, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={Math.max(200, chartData.length * 34)}>
+          <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
             <XAxis type="number" tick={{ fill: colors.textMuted, fontSize: 11 }} />
-            <YAxis dataKey="model" type="category" tick={{ fill: colors.textSecondary, fontSize: 11 }} width={88} />
+            <YAxis
+              dataKey="model"
+              type="category"
+              tick={{ fill: colors.textSecondary, fontSize: 11 }}
+              width={120}
+              interval={0}
+            />
             <Tooltip
               contentStyle={{ backgroundColor: colors.bgElevated, border: `1px solid ${colors.border}`, borderRadius: 6 }}
               labelStyle={{ color: colors.textPrimary }}
