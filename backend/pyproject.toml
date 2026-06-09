@@ -29,11 +29,18 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# pyproject.toml lives inside the backend/ package directory, but the code is
+# imported as the top-level `backend` package (e.g. `backend.main:app`). Map the
+# source files in this directory into a `backend/` package inside the wheel so the
+# import path is preserved without nesting the source under backend/backend/.
 [tool.hatch.build.targets.wheel]
-packages = ["backend"]
+only-include = ["__init__.py", "main.py", "core", "api", "models", "repositories", "services"]
+
+[tool.hatch.build.targets.wheel.sources]
+"" = "backend"
 
 [tool.pytest.ini_options]
-testpaths = ["backend/tests"]
+testpaths = ["tests"]
 addopts = "-ra -q"
 # Hypothesis: log seed for reproducibility (PBT-08), show statistics
 filterwarnings = ["ignore::DeprecationWarning"]

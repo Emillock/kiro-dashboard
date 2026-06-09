@@ -50,9 +50,8 @@ backend/.venv/Scripts/python -m pytest backend/tests/ -q
 Requires a `.env` file with valid AWS credentials:
 
 ```bash
-# Start the backend:
-cd backend
-.venv/Scripts/uvicorn backend.main:app --reload
+# Start the backend (from the repo root, so the live ./backend source is used):
+backend/.venv/Scripts/python -m uvicorn backend.main:app --reload
 
 # In another terminal — register a user:
 curl -s -X POST http://localhost:8000/api/v1/auth/register \

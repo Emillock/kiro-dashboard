@@ -13,7 +13,8 @@
 
 **Environment Variables** (copy `.env.example` → `.env`):
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION` — S3 access
-- `JWT_SECRET` — change from default before production
+- `S3_BUCKET`, `S3_BASE_PREFIX` — location of the Kiro activity-report CSVs
+- `JWT_SECRET` — change from default before production (or set `AUTH_DISABLED=true` to skip login)
 
 ---
 
@@ -21,17 +22,19 @@
 
 ### Backend
 
+`pyproject.toml` lives in `backend/` alongside the source; the code is imported as the
+top-level `backend` package.
+
 ```bash
 # From repo root — install the backend package + dev deps into the backend venv.
-uv pip install --python backend/.venv/Scripts/python -e ".[dev]"
-
-# Windows alternative (run from backend/ dir):
-cd backend
-uv venv .venv   # only if .venv doesn't exist yet
-uv pip install -e ".[dev]"
+uv pip install --python backend/.venv/Scripts/python "backend[dev]"
 ```
 
 **Expected output**: `Installed N packages in Xs` — no errors.
+
+> Run the API and tests from the repo root so the `backend.*` import path resolves
+> to the live `./backend` source (e.g. `python -m uvicorn backend.main:app --reload`,
+> `python -m pytest backend/tests`).
 
 ### Frontend
 
@@ -68,7 +71,7 @@ docker compose build frontend
 
 | Error | Cause | Fix |
 |---|---|---|
-| `ModuleNotFoundError: No module named 'backend'` | Editable install not pointing to repo root | Run `uv pip install` from repo root, not from `backend/` |
+| `ModuleNotFoundError: No module named 'backend'` | Running uvicorn/pytest from inside `backend/` | Run from the repo root so the live `./backend` package resolves |
 | `email-validator not installed` | `pydantic[email]` not in deps | `uv pip install "pydantic[email]"` |
 | Next.js build fails with TS errors | Type mismatch | Run `npm run build` to see full error; fix the indicated file |
 | Docker build fails on `uv` COPY | Docker version < BuildKit | Use `docker buildx build` or enable BuildKit |

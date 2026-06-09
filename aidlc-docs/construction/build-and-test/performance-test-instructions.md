@@ -20,8 +20,8 @@ rather than high-concurrency load scenarios.
 ## Cache Effectiveness Test (manual)
 
 ```bash
-# Start backend with .env
-cd backend && .venv/Scripts/uvicorn backend.main:app &
+# Start backend with .env (from the repo root):
+backend/.venv/Scripts/python -m uvicorn backend.main:app &
 TOKEN=<login token>
 
 # Cold request (S3 fetch + parse + cache write):
