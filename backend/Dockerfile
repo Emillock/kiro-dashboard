@@ -9,6 +9,21 @@ FROM python:3.12-slim AS base
 
 WORKDIR /app
 
+# ── Corporate proxy support ───────────────────────────────────────────────────
+# Servers without direct internet egress reach PyPI (build) and AWS S3 (runtime)
+# through an HTTP proxy. Values are passed as build args (from docker-compose /.env)
+# and also persisted as ENV so boto3 can use the proxy at runtime. Empty by default,
+# so builds on machines with direct internet are unaffected.
+ARG HTTP_PROXY=
+ARG HTTPS_PROXY=
+ARG NO_PROXY=localhost,127.0.0.1
+ENV http_proxy=${HTTP_PROXY} \
+    https_proxy=${HTTPS_PROXY} \
+    HTTP_PROXY=${HTTP_PROXY} \
+    HTTPS_PROXY=${HTTPS_PROXY} \
+    no_proxy=${NO_PROXY} \
+    NO_PROXY=${NO_PROXY}
+
 # Install uv for fast dependency management.
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
