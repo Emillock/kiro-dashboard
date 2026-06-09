@@ -6,6 +6,18 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# ── Corporate proxy support (build-time only — needed to reach the npm registry) ─
+# Empty by default; supply via docker-compose build args / .env on proxied servers.
+ARG HTTP_PROXY=
+ARG HTTPS_PROXY=
+ARG NO_PROXY=localhost,127.0.0.1
+ENV http_proxy=${HTTP_PROXY} \
+    https_proxy=${HTTPS_PROXY} \
+    HTTP_PROXY=${HTTP_PROXY} \
+    HTTPS_PROXY=${HTTPS_PROXY} \
+    no_proxy=${NO_PROXY} \
+    NO_PROXY=${NO_PROXY}
+
 # Install dependencies first for layer caching.
 COPY package.json package-lock.json ./
 RUN npm ci --prefer-offline

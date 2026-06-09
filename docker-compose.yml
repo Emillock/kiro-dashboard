@@ -16,6 +16,11 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+      args:
+        # Proxy for build-time package installs. Interpolated from .env (empty if unset).
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1}
     container_name: kiro-backend
     restart: unless-stopped
     env_file:
@@ -53,6 +58,10 @@ services:
         # so this URL must be reachable from the host — not the Docker-internal
         # service name (the browser can't resolve "backend").
         NEXT_PUBLIC_API_URL: http://localhost:8000
+        # Proxy for build-time npm install. Interpolated from .env (empty if unset).
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1}
     container_name: kiro-frontend
     restart: unless-stopped
     environment:
