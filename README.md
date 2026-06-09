@@ -1,5 +1,7 @@
 # Kiro NRT Dashboard
 
+A near-real-time metrics dashboard for Kiro IDE/CLI usage, built with FastAPI + Next.js.
+
 > **Built with AI-DLC.** This project was designed and implemented using the
 > [AI-Driven Development Life Cycle (AI-DLC)](https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/)
 > methodology — an AI-led, human-in-the-loop workflow that runs through inception
@@ -7,8 +9,6 @@
 > generation) before any code is written. The full trail of requirements, plans,
 > designs, and decisions lives in [`aidlc-docs/`](aidlc-docs/). See
 > [Acknowledgements](#acknowledgements) for links.
-
-A near-real-time metrics dashboard for Kiro IDE/CLI usage, built with FastAPI + Next.js.
 
 ## What it does
 
