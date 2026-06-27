@@ -205,7 +205,7 @@ test("Property 20: activity-drop flags are present iff the decrease% strictly ex
 // iff the preceding half has both positive messages and positive credits; the
 // engine omits the flag otherwise (Requirement 8.4), which the oracle mirrors.
 
-const userArb = (): fc.Arbitrary<UserMetrics> =>
+const userArb = (): fc.Arbitrary<DailyTotal[]> =>
   fc
     .array(dayValuesArb(), { minLength: 2, maxLength: 14 })
     .map((values) => values.map((v, i) => dayFrom(i, v)));
