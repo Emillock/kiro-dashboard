@@ -57,7 +57,11 @@ test("Property 2: percentageChange sign matches the current-vs-baseline relation
       // The sign of the percentage change is the sign of (current - baseline)
       // divided by the sign of the baseline.
       if (current === baseline) {
-        expect(value).toBe(0);
+        // `0 / baseline * 100` yields JS negative zero when baseline < 0, which
+        // is numerically equal to zero (`-0 === 0`). Adding `+ 0` normalizes -0
+        // to +0 so the strict Object.is comparison in `toBe` succeeds,
+        // consistent with the "exactly 0" test below.
+        expect(value + 0).toBe(0);
       } else if (current > baseline) {
         if (baseline > 0) {
           expect(value).toBeGreaterThan(0);

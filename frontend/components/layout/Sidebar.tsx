@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutGrid,
+  Compass,
   User,
   ArrowLeftRight,
   Gem,
@@ -16,6 +17,7 @@ import { colors } from "@/styles/theme";
 
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/", label: "Overview", icon: LayoutGrid },
+  { href: "/insights", label: "Insights", icon: Compass },
   { href: "/individual", label: "Individual", icon: User },
   { href: "/comparison", label: "Comparison", icon: ArrowLeftRight },
 ];

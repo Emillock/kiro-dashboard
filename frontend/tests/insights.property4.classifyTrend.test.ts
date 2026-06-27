@@ -63,12 +63,50 @@ test("Property 4: unchanged when the difference lies within the inclusive band",
     fc.property(
       value(),
       band(),
-      // offsetFraction in [-1, 1] => |offset| <= band (inclusive endpoints).
+      // offsetFraction in [-1, 1] targets the inclusive band including its
+      // endpoints. Reconstructing `current` introduces floating-point rounding,
+      // so `current - preceding` is not exactly `offsetFraction * b`; near ±1
+      // the realized difference can land just outside ±b. Rather than asserting
+      // a reconstructed expectation, assert CONSISTENCY with the function's own
+      // definition computed from the SAME floating-point difference, which stays
+      // robust while still exercising near-boundary inputs.
       fc.double({ min: -1, max: 1, noNaN: true, noDefaultInfinity: true }),
       (preceding, b, offsetFraction) => {
-        const offset = offsetFraction * b; // |offset| <= b
+        const offset = offsetFraction * b; // |offset| ~<= b (target region)
         const current = preceding + offset;
-        expect(classifyTrend(current, preceding, b)).toBe("unchanged");
+        const diff = current - preceding; // the actual realized difference
+        const tol = Math.abs(b);
+        if (diff > tol) {
+          expect(classifyTrend(current, preceding, b)).toBe("increase");
+        } else if (diff < -tol) {
+          expect(classifyTrend(current, preceding, b)).toBe("decrease");
+        } else {
+          expect(classifyTrend(current, preceding, b)).toBe("unchanged");
+        }
+      },
+    ),
+    { numRuns: RUNS },
+  );
+});
+
+test("Property 4: a band built to cover the difference is deterministically unchanged", () => {
+  fc.assert(
+    fc.property(
+      // Arbitrary finite current and preceding, plus a non-negative `extra`.
+      value(),
+      value(),
+      fc.double({ min: 0, max: 1e6, noNaN: true, noDefaultInfinity: true }),
+      (current, preceding, extra) => {
+        // Construct the band FROM the chosen values so the inclusive-band
+        // property holds BY CONSTRUCTION, independent of floating-point
+        // rounding: `Math.abs(current - preceding)` is the *exact* realized
+        // difference, so `band = |current - preceding| + extra` satisfies
+        // `|current - preceding| <= band` exactly in IEEE-754 (extra >= 0). The
+        // `extra === 0` case exercises the exact-boundary, and there is zero
+        // reconstruction fragility because `current` is never recomputed from
+        // `preceding` and a fraction of the band.
+        const band = Math.abs(current - preceding) + extra;
+        expect(classifyTrend(current, preceding, band)).toBe("unchanged");
       },
     ),
     { numRuns: RUNS },
