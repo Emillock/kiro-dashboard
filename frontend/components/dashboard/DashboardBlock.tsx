@@ -23,9 +23,14 @@ export function DashboardBlock({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id, disabled: locked });
 
+  // Use Translate (not Transform) so dnd-kit's scaleX/scaleY are ignored.
+  // Otherwise blocks of differing heights get squished or widened while dragging
+  // over a slot that previously held a smaller/larger block.
+  // Locked blocks stay completely static: they must never shift, even when other
+  // blocks are dragged above or below them.
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: locked ? undefined : CSS.Translate.toString(transform),
+    transition: locked ? undefined : transition,
     opacity: isDragging ? 0.7 : 1,
   };
 

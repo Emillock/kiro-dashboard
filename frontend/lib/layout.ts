@@ -67,7 +67,14 @@ export function toggleLock(blocks: BlockState[], id: string): BlockState[] {
   return blocks.map((b) => (b.id === id ? { ...b, locked: !b.locked } : b));
 }
 
-/** Reorder blocks via drag-and-drop indices (skips locked blocks as targets). */
+/**
+ * Reorder blocks via drag-and-drop indices.
+ *
+ * Locked blocks are pinned to their original positions: a locked block can never
+ * be dragged, and dragging another block above or below a locked block must not
+ * shift the locked block. Only the unlocked blocks are reordered among the slots
+ * that are not occupied by a locked block.
+ */
 export function reorderBlocks(
   blocks: BlockState[],
   fromIndex: number,
@@ -76,8 +83,28 @@ export function reorderBlocks(
   if (fromIndex === toIndex) return blocks;
   const sorted = [...blocks].sort((a, b) => a.order - b.order);
   const item = sorted[fromIndex];
+  // The dragged block must exist and must not be locked.
   if (!item || item.locked) return blocks;
-  const next = sorted.filter((_, i) => i !== fromIndex);
-  next.splice(toIndex, 0, item);
-  return next.map((b, i) => ({ ...b, order: i }));
+
+  // Apply the move on a working copy of the full ordered list.
+  const moved = [...sorted];
+  moved.splice(fromIndex, 1);
+  moved.splice(toIndex, 0, item);
+
+  // Pin every locked block back to the index it originally occupied.
+  const result: (BlockState | null)[] = new Array(sorted.length).fill(null);
+  sorted.forEach((b, i) => {
+    if (b.locked) result[i] = b;
+  });
+
+  // Thread the reordered unlocked blocks into the remaining free slots in order.
+  const movableInNewOrder = moved.filter((b) => !b.locked);
+  let cursor = 0;
+  for (let i = 0; i < result.length; i++) {
+    if (result[i] === null) {
+      result[i] = movableInNewOrder[cursor++];
+    }
+  }
+
+  return (result as BlockState[]).map((b, i) => ({ ...b, order: i }));
 }
