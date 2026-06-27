@@ -172,6 +172,12 @@ export interface SubPeriodAggregate {
 /** Per-user adoption snapshot used for rank delta (R4). */
 export interface UserAdoptionInput {
   userId: string;
+  /**
+   * Human-readable display name (typically the user's email). Optional; when
+   * absent, callers fall back to `userId`. Used only for the human-readable
+   * insight text — the canonical identity in `detail` remains `userId`.
+   */
+  label?: string;
   precedingScoreOrActivity: number;
   currentScoreOrActivity: number;
   adoptionScore: number;

@@ -90,6 +90,14 @@ export function computeAdoptionInsights(
 
   const insights: Insight[] = [];
 
+  // Map each user id to a human-readable label (email) for the insight text,
+  // falling back to the id when no label is supplied. The canonical identity in
+  // each insight's `detail` remains the `userId`.
+  const labelFor = (userId: string): string => {
+    const match = users.find((u) => u.userId === userId);
+    return match?.label ?? userId;
+  };
+
   // ── Rank movers (Requirements 4.1, 4.2, 4.3) ──────────────────────────────
   const precedingRanks = assignRanks(users, (u) => u.precedingScoreOrActivity);
   const currentRanks = assignRanks(users, (u) => u.currentScoreOrActivity);
@@ -122,7 +130,7 @@ export function computeAdoptionInsights(
       id: `adoption-rank-mover-${mover.userId}`,
       category: CATEGORY,
       title: improved ? "Rank climber" : "Rank slipper",
-      description: `${mover.userId} ${improved ? "gained" : "lost"} ${positions} leaderboard ${
+      description: `${labelFor(mover.userId)} ${improved ? "gained" : "lost"} ${positions} leaderboard ${
         positions === 1 ? "position" : "positions"
       } (rank ${mover.precedingRank} \u2192 ${mover.currentRank}).`,
       status: improved ? "increase" : "decrease",
@@ -187,7 +195,7 @@ export function computeAdoptionInsights(
       title: "New adopters",
       description: `${newAdopters.length} ${
         newAdopters.length === 1 ? "user" : "users"
-      } became active this period: ${newAdopters.join(", ")}.`,
+      } became active this period: ${newAdopters.map(labelFor).join(", ")}.`,
       status: "increase",
       magnitude: newAdopters.length,
       detail: {

@@ -200,25 +200,30 @@ export default function InsightsPage() {
         <RangeToggle range={range} onChange={setRange} />
       </div>
 
-      {/* Seven category cards in a responsive grid (Requirements 2.5, 2.6). */}
+      {/* Seven category cards in a masonry-style multi-column layout. CSS
+          columns pack cards tightly top-to-bottom within each column, so a
+          short card never leaves a large vertical gap before the next row
+          (which a fixed grid would). Each card avoids breaking across columns. */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-          gap: 16,
-          alignItems: "start",
+          columnWidth: 360,
+          columnGap: 16,
         }}
       >
         {CARD_ORDER.map(({ category, title }) => (
-          <InsightCard
+          <div
             key={category}
-            category={category}
-            title={title}
-            state={deriveCardState(
-              queryForCategory(category),
-              categorized[category],
-            )}
-          />
+            style={{ breakInside: "avoid", marginBottom: 16 }}
+          >
+            <InsightCard
+              category={category}
+              title={title}
+              state={deriveCardState(
+                queryForCategory(category),
+                categorized[category],
+              )}
+            />
+          </div>
         ))}
       </div>
     </div>

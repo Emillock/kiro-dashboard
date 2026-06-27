@@ -111,6 +111,7 @@ function buildAdoptionInputs(
   // activity. Prefer the summary list; otherwise fall back to per-user metrics.
   const base: Array<{
     userId: string;
+    label: string;
     adoptionScore: number;
     totalMessages: number;
   }> = [];
@@ -118,6 +119,7 @@ function buildAdoptionInputs(
     for (const s of userSummaries) {
       base.push({
         userId: s.user_id,
+        label: s.label,
         adoptionScore: s.adoption_score,
         totalMessages: s.total_messages,
       });
@@ -126,6 +128,7 @@ function buildAdoptionInputs(
     for (const m of userMetrics) {
       base.push({
         userId: m.user_id,
+        label: m.label,
         adoptionScore: m.adoption_score,
         totalMessages: m.total_messages,
       });
@@ -147,6 +150,7 @@ function buildAdoptionInputs(
       );
       return {
         userId: u.userId,
+        label: u.label,
         precedingScoreOrActivity: precedingActivity,
         currentScoreOrActivity: currentActivity,
         adoptionScore: u.adoptionScore,
@@ -157,6 +161,7 @@ function buildAdoptionInputs(
     // rank-delta / new-adopter logic produces no fabricated results.
     return {
       userId: u.userId,
+      label: u.label,
       precedingScoreOrActivity: u.totalMessages,
       currentScoreOrActivity: u.totalMessages,
       adoptionScore: u.adoptionScore,
