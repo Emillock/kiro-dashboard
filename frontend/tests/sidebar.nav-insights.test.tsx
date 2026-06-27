@@ -9,6 +9,7 @@
  *  - 13.2 aria-current="page" only when the active route is /insights.
  *  - 13.3 Leading icon is aria-hidden.
  */
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 
@@ -30,7 +31,15 @@ vi.mock("@/lib/queries", () => ({
 
 // next/link renders a plain anchor that forwards href and children.
 vi.mock("next/link", () => ({
-  default: ({ href, children, ...props }: any) => (
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string | { toString(): string };
+    children: ReactNode;
+    [key: string]: unknown;
+  }) => (
     <a href={typeof href === "string" ? href : String(href)} {...props}>
       {children}
     </a>
