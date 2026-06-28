@@ -38,6 +38,7 @@
  */
 
 import { useState } from "react";
+import React from "react";
 import { useQueries } from "@tanstack/react-query";
 import * as api from "@/lib/api";
 import type { RangeParam, UserMetrics } from "@/lib/api";
@@ -123,7 +124,7 @@ function deriveCardState(
       },
     };
   }
-  if (result.kind === "insufficient" || result.insights.length === 0) {
+  if (result.kind === "insufficient" || (result.kind === "insights" && result.insights.length === 0)) {
     return { kind: "empty" };
   }
   return { kind: "ready", insights: result.insights };
@@ -260,10 +261,148 @@ export default function InsightsPage() {
                 queryForCategory(category),
                 categorized[category],
               )}
+              renderReady={buildRenderReady(
+                category,
+                aggregateQuery.data?.daily_totals ?? [],
+                aggregateQuery.data?.model_distribution ?? {},
+                usersQuery.data?.users ?? [],
+                range,
+              )}
             />
           </div>
         ))}
       </div>
     </div>
   );
+}
+
+// ── Visualization wiring helpers ─────────────────────────────────────────────
+
+/**
+ * A minimal row for rendering a single text insight inside visualization cards.
+ * Used by Trends and Cost & Efficiency cards to render the text insights
+ * alongside their Recharts visualizations.
+ */
+function TrendInsightRow({ insight }: { insight: Insight }) {
+  const isMessageOnly =
+    insight.status === "insufficient_data" || insight.status === "unavailable";
+  return (
+    <div
+      key={insight.id}
+      style={{ display: "flex", flexDirection: "column", gap: 4 }}
+    >
+      <span
+        style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}
+      >
+        {insight.title}
+      </span>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 12,
+          color: isMessageOnly ? colors.textMuted : colors.textSecondary,
+        }}
+      >
+        {isMessageOnly
+          ? (insight.unavailableReason ?? insight.description)
+          : insight.description}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Build a category-specific `renderReady` function that replaces the default
+ * plain-list rendering with the appropriate visualization sub-component
+ * (Requirements 15–20).
+ *
+ * Returns `undefined` for the Engagement card, which has no dedicated
+ * visualization and renders via the default `InsightCard` list.
+ *
+ * @param category - The card's insight category.
+ * @param dailyTotals - Resolved aggregate daily totals (for TrendSparklines).
+ * @param modelDistribution - Resolved model distribution (for ModelUsageDonut).
+ * @param userSummaries - Resolved user summary list (for AdoptionLeaderboard).
+ * @param range - Current range selection (for TrendSparklines).
+ */
+function buildRenderReady(
+  category: InsightCategory,
+  dailyTotals: import("@/lib/api").DailyTotal[],
+  modelDistribution: Record<string, number>,
+  userSummaries: import("@/lib/api").UserSummary[],
+  range: RangeParam,
+): ((insights: Insight[]) => React.ReactNode) | undefined {
+  switch (category) {
+    case "trends":
+      // Render TrendSparklines above the insight text rows (Requirement 17).
+      return (insights) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <TrendSparklines dailyTotals={dailyTotals} range={range} />
+          {insights.map((insight) => (
+            <TrendInsightRow key={insight.id} insight={insight} />
+          ))}
+        </div>
+      );
+
+    case "adoption":
+      // Render AdoptionLeaderboard with adoption insights and user summaries
+      // (Requirement 15).
+      return (insights) => (
+        <AdoptionLeaderboard insights={insights} userSummaries={userSummaries} />
+      );
+
+    case "modelUsage":
+      // Render ModelUsageDonut with the model distribution and per-user outliers
+      // extracted from insights (Requirement 18).
+      return (insights) => {
+        const outlierUsers = insights
+          .filter((ins) => ins.id.startsWith("modelUsage-outlier-"))
+          .map((ins) => ({
+            userId: String(ins.detail?.["user_id"] ?? ins.id),
+            dominantModel: String(ins.detail?.["dominant_model"] ?? ""),
+          }));
+        return (
+          <ModelUsageDonut
+            modelDistribution={modelDistribution}
+            outlierUsers={outlierUsers.length > 0 ? outlierUsers : undefined}
+          />
+        );
+      };
+
+    case "costEfficiency":
+      // Render CostEfficiencyChart with high-cost users extracted from insights,
+      // plus text rows for the non-ranking insights (Requirement 16).
+      return (insights) => {
+        const highCostUsers = insights
+          .filter((ins) => ins.id.startsWith("costEfficiency-high-cost-"))
+          .map((ins) => ({
+            userId: String(ins.detail?.["userId"] ?? ins.id),
+            creditEfficiency: Number(ins.detail?.["creditEfficiency"] ?? 0),
+          }));
+        const textInsights = insights.filter(
+          (ins) => !ins.id.startsWith("costEfficiency-high-cost-"),
+        );
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <CostEfficiencyChart highCostUsers={highCostUsers} />
+            {textInsights.map((insight) => (
+              <TrendInsightRow key={insight.id} insight={insight} />
+            ))}
+          </div>
+        );
+      };
+
+    case "anomalies":
+      // Replace plain list with AnomaliesCallout styled divs (Requirement 19).
+      return (insights) => <AnomaliesCallout insights={insights} />;
+
+    case "creditDepletion":
+      // Replace plain list with CreditDepletionViz progress bars (Requirement 20).
+      return (insights) => <CreditDepletionViz insights={insights} />;
+
+    case "engagement":
+    default:
+      // No dedicated visualization — use default plain-list rendering.
+      return undefined;
+  }
 }

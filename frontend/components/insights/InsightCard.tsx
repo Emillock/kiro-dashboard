@@ -24,7 +24,7 @@
 
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { Insight, InsightCategory } from "@/lib/insights/types";
 import { InsightStatusBadge } from "@/components/insights/InsightStatusBadge";
 import { colors } from "@/styles/theme";
@@ -47,6 +47,16 @@ export interface InsightCardProps {
   title: string;
   /** Current data state to render. */
   state: CardDataState;
+  /**
+   * Optional custom renderer for the `ready` state. When provided, this
+   * function is called with the resolved `Insight[]` and its return value
+   * replaces the default plain-list rendering. Use this to wire category-
+   * specific visualization sub-components (e.g. AdoptionLeaderboard,
+   * TrendSparklines) into the card's ready state.
+   *
+   * Requirements: 2.6, 15, 16, 17, 18, 19, 20
+   */
+  renderReady?: (insights: Insight[]) => ReactNode;
 }
 
 /** Statuses that should render their message in place of a numeric value. */
@@ -76,7 +86,7 @@ const titleStyle: CSSProperties = {
 /**
  * Renders one category card, dispatching on `state.kind`.
  */
-export function InsightCard({ category, title, state }: InsightCardProps) {
+export function InsightCard({ category, title, state, renderReady }: InsightCardProps) {
   return (
     <section
       data-testid={`insight-card-${category}`}
@@ -85,7 +95,7 @@ export function InsightCard({ category, title, state }: InsightCardProps) {
     >
       {/* One level below the page <h1> (Requirement 13.4). */}
       <h2 style={titleStyle}>{title}</h2>
-      {renderState(category, title, state)}
+      {renderState(category, title, state, renderReady)}
     </section>
   );
 }
@@ -95,6 +105,7 @@ function renderState(
   category: InsightCategory,
   title: string,
   state: CardDataState,
+  renderReady?: (insights: Insight[]) => ReactNode,
 ) {
   switch (state.kind) {
     case "loading":
@@ -104,7 +115,13 @@ function renderState(
     case "empty":
       return <CardEmpty category={category} title={title} />;
     case "ready":
-      return <CardReady category={category} insights={state.insights} />;
+      return (
+        <CardReady
+          category={category}
+          insights={state.insights}
+          renderReady={renderReady}
+        />
+      );
     default: {
       // Exhaustiveness guard: if a new state kind is added, this fails to compile.
       const _exhaustive: never = state;
@@ -223,14 +240,23 @@ function CardEmpty({
  * Ready state — renders each insight. Insights with `insufficient_data` or
  * `unavailable` status render their message in place of a value, while sibling
  * insights still render (Requirements 12.3, 12.4).
+ *
+ * When `renderReady` is supplied, that function's output replaces the default
+ * plain-list rendering, allowing category-specific visualizations to take over.
  */
 function CardReady({
   category,
   insights,
+  renderReady,
 }: {
   category: InsightCategory;
   insights: Insight[];
+  renderReady?: (insights: Insight[]) => ReactNode;
 }) {
+  if (renderReady) {
+    return <>{renderReady(insights)}</>;
+  }
+
   if (insights.length === 0) {
     // Defensive: a ready-but-empty list should still render gracefully. The page
     // normally maps "no insights" to the empty state, so this is a fallback.

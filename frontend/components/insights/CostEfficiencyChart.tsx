@@ -134,7 +134,6 @@ function Chart({
             data={chartData}
             layout="vertical"
             margin={{ top: 8, right: 24, bottom: 32, left: 8 }}
-            isAnimationActive={false}
           >
             {/*
              * XAxis type="number" with domain from 0 to data max (Requirement 16.3).

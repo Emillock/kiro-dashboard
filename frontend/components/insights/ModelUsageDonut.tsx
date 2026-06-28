@@ -16,12 +16,11 @@
 
 "use client";
 
-import type { CSSProperties, FC } from "react";
+import type { CSSProperties } from "react";
 import {
   PieChart,
   Pie,
   Cell,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { colors } from "@/styles/theme";
@@ -74,6 +73,12 @@ function buildSlices(distribution: Record<string, number>): ModelSlice[] {
     }));
 }
 
+interface CustomLegendPayloadEntry {
+  value: string;
+  color?: string;
+  payload?: { sharePct?: number };
+}
+
 /**
  * Custom legend renderer that displays "modelName — share%" per entry.
  * Recharts passes `payload` with each legend item when using a custom renderer.
@@ -81,7 +86,7 @@ function buildSlices(distribution: Record<string, number>): ModelSlice[] {
 function CustomLegend({
   payload,
 }: {
-  payload?: Array<{ value: string; color: string; payload: { sharePct: number } }>;
+  payload?: CustomLegendPayloadEntry[];
 }) {
   if (!payload || payload.length === 0) return null;
 
@@ -98,28 +103,31 @@ function CustomLegend({
         color: colors.textSecondary,
       }}
     >
-      {payload.map((entry) => (
-        <li
-          key={entry.value}
-          style={{ display: "flex", alignItems: "center", gap: 6 }}
-        >
-          {/* Color swatch for visual reinforcement (requirement 18.2) */}
-          <span
-            aria-hidden="true"
-            style={{
-              display: "inline-block",
-              width: 10,
-              height: 10,
-              borderRadius: 2,
-              backgroundColor: entry.color,
-              flexShrink: 0,
-            }}
-          />
-          <span>
-            {entry.value} &mdash; {entry.payload.sharePct}%
-          </span>
-        </li>
-      ))}
+      {payload.map((entry) => {
+        const sharePct = entry.payload?.sharePct ?? 0;
+        return (
+          <li
+            key={entry.value}
+            style={{ display: "flex", alignItems: "center", gap: 6 }}
+          >
+            {/* Color swatch for visual reinforcement (requirement 18.2) */}
+            <span
+              aria-hidden="true"
+              style={{
+                display: "inline-block",
+                width: 10,
+                height: 10,
+                borderRadius: 2,
+                backgroundColor: entry.color,
+                flexShrink: 0,
+              }}
+            />
+            <span>
+              {entry.value} &mdash; {sharePct}%
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -288,19 +296,11 @@ export function ModelUsageDonut({
 
         {/* Legend listing each model name and share % (Requirement 18.2) */}
         <div style={{ flex: 1, minWidth: 140 }}>
-          <Legend
-            layout="vertical"
-            align="left"
-            verticalAlign="middle"
-            payload={slices.map((slice) => ({
-              value: slice.model,
-              color: slice.color,
-              // Pass sharePct through the payload so CustomLegend can access it.
-              payload: { sharePct: slice.sharePct },
-              type: "square" as const,
-            }))}
-            content={CustomLegend as FC}
-          />
+          <CustomLegend payload={slices.map((slice) => ({
+            value: slice.model,
+            color: slice.color,
+            payload: { sharePct: slice.sharePct },
+          }))} />
         </div>
       </div>
 
