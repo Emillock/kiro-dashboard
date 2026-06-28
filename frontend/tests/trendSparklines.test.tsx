@@ -168,12 +168,24 @@ describe("TrendSparklines sparkline containers are aria-hidden='true' (R17.7)", 
 
 /**
  * Fast-check arbitrary for a DailyTotal.
- * Dates are ISO strings; numeric fields are non-negative integers.
+ * Dates are ISO strings generated from a year + month + day triple to avoid
+ * RangeError issues with fc.date() in the jsdom environment.
+ * Numeric fields are non-negative integers.
  */
+const dateStringArb = fc
+  .tuple(
+    fc.integer({ min: 2023, max: 2025 }),
+    fc.integer({ min: 1, max: 12 }),
+    fc.integer({ min: 1, max: 28 }), // cap at 28 to avoid invalid day-of-month combos
+  )
+  .map(([year, month, day]) => {
+    const mm = String(month).padStart(2, "0");
+    const dd = String(day).padStart(2, "0");
+    return `${year}-${mm}-${dd}`;
+  });
+
 const dailyTotalArb = fc.record({
-  date: fc.date({ min: new Date("2024-01-01"), max: new Date("2024-12-31") }).map(
-    (d) => d.toISOString().slice(0, 10),
-  ),
+  date: dateStringArb,
   total_messages: fc.integer({ min: 0, max: 10_000 }),
   chat_conversations: fc.integer({ min: 0, max: 5_000 }),
   credits_used: fc.integer({ min: 0, max: 50_000 }),
