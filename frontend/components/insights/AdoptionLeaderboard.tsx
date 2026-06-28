@@ -49,8 +49,8 @@ function toFixed2(n: number): string {
  * (`rankDelta === 0`) or are new entrants. We distinguish them below by
  * checking whether they appeared in the preceding sub-period.
  */
-function buildRankDeltaMap(insights: Insight[]): Map<string, number> {
-  const map = new Map<string, number>();
+function buildRankDeltaMap(insights: Insight[]): Map<string, { rankDelta: number; precedingRank: number; currentRank: number }> {
+  const map = new Map<string, { rankDelta: number; precedingRank: number; currentRank: number }>();
   for (const insight of insights) {
     if (
       insight.id.startsWith("adoption-rank-mover-") &&
@@ -58,7 +58,11 @@ function buildRankDeltaMap(insights: Insight[]): Map<string, number> {
       typeof insight.detail.userId === "string" &&
       typeof insight.detail.rankDelta === "number"
     ) {
-      map.set(insight.detail.userId, insight.detail.rankDelta);
+      map.set(insight.detail.userId, {
+        rankDelta: insight.detail.rankDelta as number,
+        precedingRank: insight.detail.precedingRank as number,
+        currentRank: insight.detail.currentRank as number,
+      });
     }
   }
   return map;
@@ -102,44 +106,48 @@ function buildNewEntrantSet(insights: Insight[]): Set<string> {
 /** Direction indicator presentation. */
 interface DeltaIndicator {
   char: string;
+  text: string;
   ariaLabel: string;
+  color: string;
 }
 
 function getDeltaIndicator(
   userId: string,
-  rankDeltaMap: Map<string, number>,
+  rankDeltaMap: Map<string, { rankDelta: number; precedingRank: number; currentRank: number }>,
   newEntrantSet: Set<string>,
 ): DeltaIndicator {
   // New entrant: no prior rank (Requirement 15.6)
   if (newEntrantSet.has(userId)) {
-    return { char: "–", ariaLabel: "new entry" };
+    return { char: "✦", text: "new", ariaLabel: "new entry", color: colors.accentLight };
   }
 
-  const delta = rankDeltaMap.get(userId);
+  const entry = rankDeltaMap.get(userId);
 
-  if (delta === undefined) {
+  if (entry === undefined) {
     // User existed in both periods but had no rank change (Requirement 15.5)
-    return { char: "–", ariaLabel: "no change" };
+    return { char: "–", text: "–", ariaLabel: "no change", color: colors.textMuted };
   }
 
-  if (delta > 0) {
+  const { rankDelta, precedingRank } = entry;
+
+  if (rankDelta > 0) {
     // Improved rank (Requirement 15.3)
-    return { char: "↑", ariaLabel: `up ${delta} positions` };
+    return { char: "↑", text: `↑ #${precedingRank}`, ariaLabel: `up ${rankDelta} positions from rank ${precedingRank}`, color: colors.success };
   }
 
-  if (delta < 0) {
+  if (rankDelta < 0) {
     // Declined rank (Requirement 15.4)
-    return { char: "↓", ariaLabel: `down ${Math.abs(delta)} positions` };
+    return { char: "↓", text: `↓ #${precedingRank}`, ariaLabel: `down ${Math.abs(rankDelta)} positions from rank ${precedingRank}`, color: colors.error };
   }
 
   // Explicit zero delta
-  return { char: "–", ariaLabel: "no change" };
+  return { char: "–", text: "–", ariaLabel: "no change", color: colors.textMuted };
 }
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 
 const containerStyle: CSSProperties = {
-  maxHeight: 200,
+  maxHeight: 300,
   overflowY: "auto",
   overflowX: "hidden",
 };
@@ -288,13 +296,13 @@ export function AdoptionLeaderboard({
 
                 {/* Direction indicator: character + aria-label, never color alone
                     (Requirement 15.8) */}
-                <td style={tdRightStyle}>
+                <td style={{ ...tdRightStyle, color: indicator.color, fontWeight: 600, whiteSpace: "nowrap" }}>
                   <span
                     aria-label={indicator.ariaLabel}
                     role="img"
                     data-testid={`leaderboard-delta-${user.user_id}`}
                   >
-                    {indicator.char}
+                    {indicator.text}
                   </span>
                 </td>
               </tr>

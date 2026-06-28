@@ -63,8 +63,8 @@ import { AdoptionLeaderboard } from "@/components/insights/AdoptionLeaderboard";
 import { CostEfficiencyChart } from "@/components/insights/CostEfficiencyChart";
 import { TrendSparklines } from "@/components/insights/TrendSparklines";
 import { ModelUsageDonut } from "@/components/insights/ModelUsageDonut";
-import { AnomaliesCallout } from "@/components/insights/AnomaliesCallout";
 import { CreditDepletionCard as CreditDepletionViz } from "@/components/insights/CreditDepletionCard";
+import { InsightStatusBadge } from "@/components/insights/InsightStatusBadge";
 import { colors } from "@/styles/theme";
 
 /**
@@ -78,7 +78,6 @@ const CARD_ORDER: { category: InsightCategory; title: string }[] = [
   { category: "engagement", title: "Engagement" },
   { category: "modelUsage", title: "Model Usage" },
   { category: "costEfficiency", title: "Cost & Efficiency" },
-  { category: "anomalies", title: "Anomalies" },
   { category: "creditDepletion", title: "Credit Depletion" },
 ];
 
@@ -231,7 +230,7 @@ export default function InsightsPage() {
         .insights-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 16px;
+          gap: 12px;
         }
         @media (min-width: 768px) {
           .insights-grid {
@@ -340,7 +339,7 @@ function makeAdoptionRenderer(userSummaries: import("@/lib/api").UserSummary[]) 
   };
 }
 
-function makeModelUsageRenderer(modelDistribution: Record<string, number>) {
+function makeModelUsageRenderer(modelDistribution: Record<string, number>, userSummaries: import("@/lib/api").UserSummary[]) {
   return function ModelUsageRenderer(insights: Insight[]): React.ReactNode {
     const outlierUsers = insights
       .filter((ins) => ins.id.startsWith("modelUsage-outlier-"))
@@ -352,19 +351,24 @@ function makeModelUsageRenderer(modelDistribution: Record<string, number>) {
       <ModelUsageDonut
         modelDistribution={modelDistribution}
         outlierUsers={outlierUsers.length > 0 ? outlierUsers : undefined}
+        userSummaries={userSummaries}
       />
     );
   };
 }
 
-function makeCostEfficiencyRenderer() {
+function makeCostEfficiencyRenderer(userSummaries: import("@/lib/api").UserSummary[]) {
   return function CostEfficiencyRenderer(insights: Insight[]): React.ReactNode {
     const highCostUsers = insights
       .filter((ins) => ins.id.startsWith("costEfficiency-high-cost-"))
-      .map((ins) => ({
-        userId: String(ins.detail?.["userId"] ?? ins.id),
-        creditEfficiency: Number(ins.detail?.["creditEfficiency"] ?? 0),
-      }));
+      .map((ins) => {
+        const rawUserId = String(ins.detail?.["userId"] ?? ins.id);
+        const found = userSummaries.find((u) => u.user_id === rawUserId);
+        return {
+          userId: found?.label || rawUserId,
+          creditEfficiency: Number(ins.detail?.["creditEfficiency"] ?? 0),
+        };
+      });
     const textInsights = insights.filter(
       (ins) => !ins.id.startsWith("costEfficiency-high-cost-"),
     );
@@ -379,12 +383,76 @@ function makeCostEfficiencyRenderer() {
   };
 }
 
-function AnomaliesRenderer(insights: Insight[]): React.ReactNode {
-  return <AnomaliesCallout insights={insights} />;
+function CreditDepletionRenderer(insights: Insight[]): React.ReactNode {
+  const hasUnavailable = insights.some((i) => i.status === "unavailable");
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {hasUnavailable && (
+        <div style={{
+          backgroundColor: colors.bgElevated,
+          borderLeft: `3px solid ${colors.warning}`,
+          borderRadius: 4,
+          padding: "8px 12px",
+          fontSize: 12,
+          color: colors.textSecondary,
+        }}>
+          <strong style={{ color: colors.textPrimary }}>Why are some insights unavailable?</strong>
+          <p style={{ margin: "4px 0 0" }}>
+            Credits remaining, burn-rate projections, early-burner detection, and underutilizer analysis
+            require per-tier credit allowance and overage data. These fields are not yet exposed by the backend API.
+            The insights that can be computed from available data are shown below.
+          </p>
+        </div>
+      )}
+      <CreditDepletionViz insights={insights} />
+    </div>
+  );
 }
 
-function CreditDepletionRenderer(insights: Insight[]): React.ReactNode {
-  return <CreditDepletionViz insights={insights} />;
+function makeEngagementRenderer(userSummaries: import("@/lib/api").UserSummary[]) {
+  return function EngagementRenderer(insights: Insight[]): React.ReactNode {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {insights.map((insight) => {
+          // Special handling for dormant users insight
+          if (insight.id === "engagement-dormant-users" && insight.detail && typeof insight.detail.userIds === "string" && insight.detail.userIds.length > 0) {
+            const dormantIds = insight.detail.userIds.split(",").map((s: string) => s.trim()).filter(Boolean);
+            const dormantLabels = dormantIds.map((id: string) => {
+              const found = userSummaries.find((u) => u.user_id === id);
+              return found?.label || id;
+            });
+            return (
+              <div key={insight.id} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{insight.title}</span>
+                  <InsightStatusBadge status={insight.status} />
+                </div>
+                <p style={{ margin: 0, fontSize: 12, color: colors.textSecondary }}>{insight.description}</p>
+                <ul role="list" style={{ listStyle: "none", margin: 0, padding: "6px 8px", maxHeight: 140, overflowY: "auto", backgroundColor: colors.bgElevated, borderRadius: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                  {dormantLabels.map((label: string) => (
+                    <li key={label} style={{ fontSize: 12, color: colors.textSecondary, padding: "2px 0" }}>{label}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          }
+          // Default rendering for other engagement insights
+          const isMessageOnly = insight.status === "insufficient_data" || insight.status === "unavailable";
+          return (
+            <div key={insight.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{insight.title}</span>
+                <InsightStatusBadge status={insight.status} />
+              </div>
+              <p style={{ margin: 0, fontSize: 12, color: isMessageOnly ? colors.textMuted : colors.textSecondary }}>
+                {isMessageOnly ? (insight.unavailableReason ?? insight.description) : insight.description}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 }
 
 /**
@@ -413,15 +481,14 @@ function buildRenderReady(
       return makeTrendsRenderer(dailyTotals, range);
     case "adoption":
       return makeAdoptionRenderer(userSummaries);
+    case "engagement":
+      return makeEngagementRenderer(userSummaries);
     case "modelUsage":
-      return makeModelUsageRenderer(modelDistribution);
+      return makeModelUsageRenderer(modelDistribution, userSummaries);
     case "costEfficiency":
-      return makeCostEfficiencyRenderer();
-    case "anomalies":
-      return AnomaliesRenderer;
+      return makeCostEfficiencyRenderer(userSummaries);
     case "creditDepletion":
       return CreditDepletionRenderer;
-    case "engagement":
     default:
       return undefined;
   }

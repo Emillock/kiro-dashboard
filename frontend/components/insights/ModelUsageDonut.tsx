@@ -22,6 +22,7 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
 import { colors } from "@/styles/theme";
 
@@ -30,6 +31,8 @@ export interface ModelUsageDonutProps {
   modelDistribution: Record<string, number>;
   /** Per-user model outliers from the engine (Requirement 18.5). */
   outlierUsers?: Array<{ userId: string; dominantModel: string }>;
+  /** User summaries for resolving userId to email label. */
+  userSummaries?: Array<{ user_id: string; label: string }>;
 }
 
 /** A single computed slice entry. */
@@ -133,6 +136,27 @@ function CustomLegend({
 }
 
 /**
+ * Custom tooltip for the PieChart.
+ */
+function PieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ name: string; payload: { model: string; sharePct: number; count: number } }> }) {
+  if (!active || !payload || payload.length === 0) return null;
+  const { model, sharePct, count } = payload[0].payload;
+  return (
+    <div style={{
+      backgroundColor: colors.bgPanel,
+      border: `1px solid ${colors.border}`,
+      borderRadius: 4,
+      padding: "6px 10px",
+      fontSize: 12,
+      color: colors.textPrimary,
+    }}>
+      <div style={{ fontWeight: 600 }}>{model}</div>
+      <div style={{ color: colors.textSecondary }}>{sharePct}% · {count.toLocaleString()} msgs</div>
+    </div>
+  );
+}
+
+/**
  * The SVG text label centered in the donut hole showing the dominant model
  * name and share (Requirement 18.4). Rendered as a Recharts customized label
  * inside the <Pie> via the `label` prop approach, but here we use a standalone
@@ -209,6 +233,7 @@ function DonutCenterLabel({
 export function ModelUsageDonut({
   modelDistribution,
   outlierUsers,
+  userSummaries,
 }: ModelUsageDonutProps) {
   const slices = buildSlices(modelDistribution);
 
@@ -262,15 +287,11 @@ export function ModelUsageDonut({
             flexShrink: 0,
           }}
         >
-          {/* Donut hole center text (Requirement 18.4) — rendered as overlay */}
-          <DonutCenterLabel
-            model={dominant.model}
-            sharePct={dominant.sharePct}
-            containerSize={CHART_SIZE}
-          />
+          {/* DonutCenterLabel removed — dominant model shown in legend */}
 
           <ResponsiveContainer width={CHART_SIZE} height={CHART_SIZE}>
             <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+              <Tooltip content={<PieTooltip />} />
               <Pie
                 data={slices}
                 dataKey="count"
@@ -280,6 +301,8 @@ export function ModelUsageDonut({
                 innerRadius={INNER_RADIUS}
                 outerRadius={OUTER_RADIUS}
                 isAnimationActive={false}
+                strokeWidth={0}
+                stroke="none"
               >
                 {slices.map((slice) => (
                   <Cell
@@ -306,7 +329,7 @@ export function ModelUsageDonut({
 
       {/* Per-user outlier list (Requirement 18.5) */}
       {outlierUsers && outlierUsers.length > 0 && (
-        <OutlierList outlierUsers={outlierUsers} />
+        <OutlierList outlierUsers={outlierUsers} userSummaries={userSummaries} />
       )}
     </div>
   );
@@ -317,9 +340,16 @@ export function ModelUsageDonut({
  */
 function OutlierList({
   outlierUsers,
+  userSummaries,
 }: {
   outlierUsers: Array<{ userId: string; dominantModel: string }>;
+  userSummaries?: Array<{ user_id: string; label: string }>;
 }) {
+  function resolveLabel(userId: string): string {
+    if (!userSummaries) return userId;
+    const found = userSummaries.find((u) => u.user_id === userId);
+    return found?.label || userId;
+  }
   const scrollableStyle: CSSProperties = {
     maxHeight: 200,
     overflowY: "auto",
@@ -367,7 +397,7 @@ function OutlierList({
       >
         {outlierUsers.map(({ userId, dominantModel }) => (
           <li key={userId} style={rowStyle}>
-            <span style={userIdStyle}>{userId}</span>
+            <span style={userIdStyle}>{resolveLabel(userId)}</span>
             <span style={{ color: colors.textMuted }}>primarily uses</span>
             <span style={modelStyle}>{dominantModel}</span>
           </li>

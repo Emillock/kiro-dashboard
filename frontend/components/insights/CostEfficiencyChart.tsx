@@ -22,6 +22,7 @@ import {
   YAxis,
   Cell,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
 import { colors } from "@/styles/theme";
 
@@ -76,6 +77,27 @@ export function CostEfficiencyChart({ highCostUsers }: CostEfficiencyChartProps)
 }
 
 /**
+ * Custom tooltip for the BarChart showing userId and creditEfficiency.
+ */
+function BarTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { userId: string; creditEfficiency: number } }> }) {
+  if (!active || !payload || payload.length === 0) return null;
+  const { userId, creditEfficiency } = payload[0].payload;
+  return (
+    <div style={{
+      backgroundColor: colors.bgPanel,
+      border: `1px solid ${colors.border}`,
+      borderRadius: 4,
+      padding: "6px 10px",
+      fontSize: 12,
+      color: colors.textPrimary,
+    }}>
+      <div style={{ fontWeight: 600 }}>{userId}</div>
+      <div style={{ color: colors.textSecondary }}>{creditEfficiency} credits/msg</div>
+    </div>
+  );
+}
+
+/**
  * The Recharts BarChart rendering — used when ≥2 high-cost users are present.
  */
 function Chart({
@@ -124,7 +146,7 @@ function Chart({
           </li>
         ))}
       </ul>
-      <div aria-hidden="true">
+      <div aria-hidden="true" style={{ outline: "none" }} tabIndex={-1}>
         <ResponsiveContainer width={480} height={chartHeight}>
           {/*
            * layout="vertical" makes the bars grow horizontally,
@@ -160,7 +182,7 @@ function Chart({
             <YAxis
               type="category"
               dataKey="userId"
-              width={120}
+              width={160}
               tick={{ fill: colors.textSecondary, fontSize: 11 }}
               axisLine={{ stroke: colors.border }}
               tickLine={false}
@@ -179,6 +201,7 @@ function Chart({
                 />
               ))}
             </Bar>
+            <Tooltip content={<BarTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
           </BarChart>
         </ResponsiveContainer>
       </div>
