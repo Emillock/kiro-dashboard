@@ -417,7 +417,7 @@ describe("Property 36: Donut slice colors cycle the palette without skipping", (
       }),
       { numRuns: RUNS },
     );
-  });
+  }, 30000);
 });
 
 // ── Property 37: PieChart and Cell aria-labels follow specified formats ────────

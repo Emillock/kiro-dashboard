@@ -137,7 +137,7 @@ function createMockCategorizedInsights(): CategorizedInsights {
   ] as const;
   return Object.fromEntries(
     categories.map((cat) => [cat, { kind: "insights", insights: [] }]),
-  ) as CategorizedInsights;
+  ) as unknown as CategorizedInsights;
 }
 
 vi.mock("@/lib/insights", () => ({
@@ -171,6 +171,7 @@ const CARD_ORDER = [
 ] as const;
 
 /** Chart-bearing categories that should receive gridColumn "span 2". */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CHART_CARD_CATEGORIES = new Set(["trends", "modelUsage", "costEfficiency"]);
 
 function makeDailyTotals(): DailyTotal[] {

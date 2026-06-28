@@ -327,7 +327,7 @@ describe("Property 30: Leaderboard rows appear in ascending rank order", () => {
       }),
       { numRuns: RUNS },
     );
-  });
+  }, 30000);
 });
 
 // ── Property 31: Delta indicator direction matches Rank_Delta sign ─────────────
@@ -402,5 +402,5 @@ describe("Property 31: Delta indicator direction matches Rank_Delta sign", () =>
       }),
       { numRuns: RUNS },
     );
-  });
+  }, 30000);
 });

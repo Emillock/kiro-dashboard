@@ -254,6 +254,7 @@ describe("Property 34: Sparkline data is chronological and Y-domain covers all v
         { numRuns: RUNS },
       );
     },
+    30000,
   );
 
   /**

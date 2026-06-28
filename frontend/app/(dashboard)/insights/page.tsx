@@ -311,6 +311,82 @@ function TrendInsightRow({ insight }: { insight: Insight }) {
   );
 }
 
+// ── Named render-ready components ────────────────────────────────────────────
+// Each is a named function so react/display-name is satisfied. They are
+// factories: the outer function closes over the data it needs and returns the
+// named inner renderer that InsightCard will call with the resolved insights.
+
+function makeTrendsRenderer(
+  dailyTotals: import("@/lib/api").DailyTotal[],
+  range: RangeParam,
+) {
+  return function TrendsRenderer(insights: Insight[]): React.ReactNode {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <TrendSparklines dailyTotals={dailyTotals} range={range} />
+        {insights.map((insight) => (
+          <TrendInsightRow key={insight.id} insight={insight} />
+        ))}
+      </div>
+    );
+  };
+}
+
+function makeAdoptionRenderer(userSummaries: import("@/lib/api").UserSummary[]) {
+  return function AdoptionRenderer(insights: Insight[]): React.ReactNode {
+    return (
+      <AdoptionLeaderboard insights={insights} userSummaries={userSummaries} />
+    );
+  };
+}
+
+function makeModelUsageRenderer(modelDistribution: Record<string, number>) {
+  return function ModelUsageRenderer(insights: Insight[]): React.ReactNode {
+    const outlierUsers = insights
+      .filter((ins) => ins.id.startsWith("modelUsage-outlier-"))
+      .map((ins) => ({
+        userId: String(ins.detail?.["user_id"] ?? ins.id),
+        dominantModel: String(ins.detail?.["dominant_model"] ?? ""),
+      }));
+    return (
+      <ModelUsageDonut
+        modelDistribution={modelDistribution}
+        outlierUsers={outlierUsers.length > 0 ? outlierUsers : undefined}
+      />
+    );
+  };
+}
+
+function makeCostEfficiencyRenderer() {
+  return function CostEfficiencyRenderer(insights: Insight[]): React.ReactNode {
+    const highCostUsers = insights
+      .filter((ins) => ins.id.startsWith("costEfficiency-high-cost-"))
+      .map((ins) => ({
+        userId: String(ins.detail?.["userId"] ?? ins.id),
+        creditEfficiency: Number(ins.detail?.["creditEfficiency"] ?? 0),
+      }));
+    const textInsights = insights.filter(
+      (ins) => !ins.id.startsWith("costEfficiency-high-cost-"),
+    );
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <CostEfficiencyChart highCostUsers={highCostUsers} />
+        {textInsights.map((insight) => (
+          <TrendInsightRow key={insight.id} insight={insight} />
+        ))}
+      </div>
+    );
+  };
+}
+
+function AnomaliesRenderer(insights: Insight[]): React.ReactNode {
+  return <AnomaliesCallout insights={insights} />;
+}
+
+function CreditDepletionRenderer(insights: Insight[]): React.ReactNode {
+  return <CreditDepletionViz insights={insights} />;
+}
+
 /**
  * Build a category-specific `renderReady` function that replaces the default
  * plain-list rendering with the appropriate visualization sub-component
@@ -334,75 +410,19 @@ function buildRenderReady(
 ): ((insights: Insight[]) => React.ReactNode) | undefined {
   switch (category) {
     case "trends":
-      // Render TrendSparklines above the insight text rows (Requirement 17).
-      return (insights) => (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <TrendSparklines dailyTotals={dailyTotals} range={range} />
-          {insights.map((insight) => (
-            <TrendInsightRow key={insight.id} insight={insight} />
-          ))}
-        </div>
-      );
-
+      return makeTrendsRenderer(dailyTotals, range);
     case "adoption":
-      // Render AdoptionLeaderboard with adoption insights and user summaries
-      // (Requirement 15).
-      return (insights) => (
-        <AdoptionLeaderboard insights={insights} userSummaries={userSummaries} />
-      );
-
+      return makeAdoptionRenderer(userSummaries);
     case "modelUsage":
-      // Render ModelUsageDonut with the model distribution and per-user outliers
-      // extracted from insights (Requirement 18).
-      return (insights) => {
-        const outlierUsers = insights
-          .filter((ins) => ins.id.startsWith("modelUsage-outlier-"))
-          .map((ins) => ({
-            userId: String(ins.detail?.["user_id"] ?? ins.id),
-            dominantModel: String(ins.detail?.["dominant_model"] ?? ""),
-          }));
-        return (
-          <ModelUsageDonut
-            modelDistribution={modelDistribution}
-            outlierUsers={outlierUsers.length > 0 ? outlierUsers : undefined}
-          />
-        );
-      };
-
+      return makeModelUsageRenderer(modelDistribution);
     case "costEfficiency":
-      // Render CostEfficiencyChart with high-cost users extracted from insights,
-      // plus text rows for the non-ranking insights (Requirement 16).
-      return (insights) => {
-        const highCostUsers = insights
-          .filter((ins) => ins.id.startsWith("costEfficiency-high-cost-"))
-          .map((ins) => ({
-            userId: String(ins.detail?.["userId"] ?? ins.id),
-            creditEfficiency: Number(ins.detail?.["creditEfficiency"] ?? 0),
-          }));
-        const textInsights = insights.filter(
-          (ins) => !ins.id.startsWith("costEfficiency-high-cost-"),
-        );
-        return (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <CostEfficiencyChart highCostUsers={highCostUsers} />
-            {textInsights.map((insight) => (
-              <TrendInsightRow key={insight.id} insight={insight} />
-            ))}
-          </div>
-        );
-      };
-
+      return makeCostEfficiencyRenderer();
     case "anomalies":
-      // Replace plain list with AnomaliesCallout styled divs (Requirement 19).
-      return (insights) => <AnomaliesCallout insights={insights} />;
-
+      return AnomaliesRenderer;
     case "creditDepletion":
-      // Replace plain list with CreditDepletionViz progress bars (Requirement 20).
-      return (insights) => <CreditDepletionViz insights={insights} />;
-
+      return CreditDepletionRenderer;
     case "engagement":
     default:
-      // No dedicated visualization — use default plain-list rendering.
       return undefined;
   }
 }

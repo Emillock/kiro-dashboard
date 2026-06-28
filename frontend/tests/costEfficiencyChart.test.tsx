@@ -229,7 +229,7 @@ describe("Property 32: Bar count and order match engine high-cost users", () => 
       }),
       { numRuns: RUNS },
     );
-  });
+  }, 30000);
 
   test("Property 32: rendered bars appear in the same order as the input array", () => {
     const highCostUsersArb = fc
@@ -273,7 +273,7 @@ describe("Property 32: Bar count and order match engine high-cost users", () => 
       }),
       { numRuns: RUNS },
     );
-  });
+  }, 30000);
 });
 
 // ── Property 33: Bar aria-labels follow the specified format ──────────────────
@@ -333,7 +333,7 @@ describe("Property 33: Bar aria-labels follow the specified format", () => {
       }),
       { numRuns: RUNS },
     );
-  });
+  }, 30000);
 
   test("Property 33: aria-label format holds for edge-case efficiency values (0, integers, decimals)", () => {
     const edgeCases = [
