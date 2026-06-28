@@ -53,15 +53,23 @@ import {
 import type {
   CategoryResult,
   InsightCategory,
+  Insight,
 } from "@/lib/insights/types";
 import { InsightCard } from "@/components/insights/InsightCard";
 import type { CardDataState } from "@/components/insights/InsightCard";
 import { RangeToggle } from "@/components/common/RangeToggle";
+import { AdoptionLeaderboard } from "@/components/insights/AdoptionLeaderboard";
+import { CostEfficiencyChart } from "@/components/insights/CostEfficiencyChart";
+import { TrendSparklines } from "@/components/insights/TrendSparklines";
+import { ModelUsageDonut } from "@/components/insights/ModelUsageDonut";
+import { AnomaliesCallout } from "@/components/insights/AnomaliesCallout";
+import { CreditDepletionCard as CreditDepletionViz } from "@/components/insights/CreditDepletionCard";
 import { colors } from "@/styles/theme";
 
 /**
  * The seven categories rendered as cards, in display order, each paired with a
  * human-readable title containing the category name (Requirements 2.5, 2.6).
+ * Order is fixed — no drag-and-drop reordering (Requirement 14.7).
  */
 const CARD_ORDER: { category: InsightCategory; title: string }[] = [
   { category: "trends", title: "Trends" },
@@ -72,6 +80,17 @@ const CARD_ORDER: { category: InsightCategory; title: string }[] = [
   { category: "anomalies", title: "Anomalies" },
   { category: "creditDepletion", title: "Credit Depletion" },
 ];
+
+/**
+ * Categories whose cards host a Recharts visualization. These cards receive
+ * `gridColumn: "span 2"` at multi-column viewports so charts have adequate
+ * horizontal space (Requirement 14.2).
+ */
+const CHART_CARD_CATEGORIES: Set<InsightCategory> = new Set([
+  "trends",
+  "modelUsage",
+  "costEfficiency",
+]);
 
 /** Minimal shape of a query the cards depend on for state derivation. */
 interface CardQuery {
@@ -200,20 +219,39 @@ export default function InsightsPage() {
         <RangeToggle range={range} onChange={setRange} />
       </div>
 
-      {/* Seven category cards in a masonry-style multi-column layout. CSS
-          columns pack cards tightly top-to-bottom within each column, so a
-          short card never leaves a large vertical gap before the next row
-          (which a fixed grid would). Each card avoids breaking across columns. */}
-      <div
-        style={{
-          columnWidth: 360,
-          columnGap: 16,
-        }}
-      >
+      {/* Responsive CSS grid — breakpoints injected via <style> tag since inline
+          styles cannot express @media queries (Requirement 14.3–14.5).
+          Class `insights-grid` is scoped to this page only.
+          < 768px        → 1 column  (single column, full width)
+          768–1199px     → 2 columns (repeat(2, 1fr))
+          ≥ 1200px       → 4 columns (repeat(4, 1fr))
+          Chart-bearing cards span 2 columns; text-only cards span 1 (Req 14.2). */}
+      <style>{`
+        .insights-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        @media (min-width: 768px) {
+          .insights-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (min-width: 1200px) {
+          .insights-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+      `}</style>
+      <div className="insights-grid">
         {CARD_ORDER.map(({ category, title }) => (
           <div
             key={category}
-            style={{ breakInside: "avoid", marginBottom: 16 }}
+            style={{
+              gridColumn: CHART_CARD_CATEGORIES.has(category)
+                ? "span 2"
+                : "span 1",
+            }}
           >
             <InsightCard
               category={category}
