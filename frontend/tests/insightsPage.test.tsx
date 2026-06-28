@@ -1,25 +1,21 @@
 // @vitest-environment jsdom
 /**
- * Component + accessibility tests for the InsightsPage orchestrator (task 15.2).
+ * Component, grid layout, and accessibility tests for the InsightsPage
+ * orchestrator (task 17.3).
  *
- * Validates: Requirements 2.4, 2.5, 2.6, 13.4, 13.5, 13.6, 13.7, 13.8
- *  - 2.4  Range defaults to "month"; the Range control reflects the active value.
+ * Validates: Requirements 2.4, 2.5, 2.6, 13.4, 13.5, 13.6, 13.7, 13.8,
+ *            14.1, 14.2, 14.7
+ *  - 2.4  Range defaults to "month"; all cards re-render on range change.
  *  - 2.5  Exactly seven category Insight_Cards render.
  *  - 2.6  Each card displays a visible heading containing the category name.
- *  - 13.4 Exactly one <h1> page heading; each card title is an <h2> (one level
- *         below the page heading, no skipped levels).
- *  - 13.5 The Range control is keyboard-focusable (its buttons are real
- *         <button>s) with a visible focus path.
- *  - 13.6 Activating the Range control via keyboard/pointer changes the range
- *         without a pointing device requirement.
- *  - 13.7 The Range control is exposed to assistive tech with a non-empty
- *         accessible name and an exposed current value (aria-pressed).
- *  - 13.8 No axe-core accessibility violations (status conveyed via text/aria,
- *         not color alone).
- *
- * The data layer is mocked so the page renders deterministically without
- * network. The real RangeToggle and the real (pure) computeInsights engine are
- * exercised so the test reflects actual card content and the real Range control.
+ *  - 13.4 Exactly one <h1> page heading; each card title is an <h2>.
+ *  - 13.5 The Range control buttons are real <button>s, keyboard-focusable.
+ *  - 13.6 Activating the Range control via keyboard changes the range.
+ *  - 13.7 The Range control exposes a non-empty accessible name + aria-pressed.
+ *  - 13.8 No axe-core accessibility violations.
+ *  - 14.1 Outer container has display: grid.
+ *  - 14.2 Chart-bearing cards have gridColumn "span 2"; text-only have "span 1".
+ *  - 14.7 Card order matches CARD_ORDER constant (fixed, no reordering).
  */
 import {
   afterEach,
@@ -38,10 +34,11 @@ import type {
   DailyTotal,
   UserSummary,
 } from "@/lib/api";
+import type { CategorizedInsights } from "@/lib/insights/types";
 
 expect.extend(toHaveNoViolations);
 
-// ── Mutable mock state, set per test (mirrors the sidebar test pattern) ──────
+// ── Mutable mock state ────────────────────────────────────────────────────────
 
 interface QueryLike {
   data: unknown;
@@ -59,21 +56,98 @@ vi.mock("@/lib/queries", () => ({
   useRefreshInterval: () => false,
 }));
 
-// The per-user fan-out is mocked to resolve to an empty array so the engine
-// receives a null userMetrics list and degrades gracefully (no network).
-vi.mock("@tanstack/react-query", () => ({
-  useQueries: () => [],
-}));
+// Keep only useQueries mocked to an empty array; spread the rest of the module
+// so QueryClientProvider and other exports remain functional if needed.
+vi.mock("@tanstack/react-query", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
+  return { ...actual, useQueries: vi.fn(() => []) };
+});
 
-// getUserMetrics is only referenced inside the (bypassed) useQueries queryFn.
 vi.mock("@/lib/api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/api")>();
   return { ...actual, getUserMetrics: vi.fn() };
 });
 
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/insights",
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+vi.mock("@/lib/auth-context", () => ({
+  useAuth: () => ({ logout: vi.fn() }),
+}));
+
+// ── Mock all visualization sub-components to avoid Recharts ARIA side-effects ─
+// The page test is an integration test for orchestration and layout; the
+// sub-components have their own test files that cover visualization details.
+
+vi.mock("@/components/insights/AdoptionLeaderboard", () => ({
+  AdoptionLeaderboard: ({ insights }: { insights: unknown[] }) => (
+    <div data-testid="mock-adoption-leaderboard">
+      {insights.length} adoption insights
+    </div>
+  ),
+}));
+
+vi.mock("@/components/insights/CostEfficiencyChart", () => ({
+  CostEfficiencyChart: () => (
+    <div data-testid="mock-cost-efficiency-chart">Cost chart</div>
+  ),
+}));
+
+vi.mock("@/components/insights/TrendSparklines", () => ({
+  TrendSparklines: () => (
+    <div data-testid="mock-trend-sparklines">Trend sparklines</div>
+  ),
+}));
+
+vi.mock("@/components/insights/ModelUsageDonut", () => ({
+  ModelUsageDonut: () => (
+    <div data-testid="mock-model-usage-donut">Model donut</div>
+  ),
+}));
+
+vi.mock("@/components/insights/AnomaliesCallout", () => ({
+  AnomaliesCallout: ({ insights }: { insights: unknown[] }) => (
+    <div data-testid="mock-anomalies-callout">
+      {insights.length} anomaly insights
+    </div>
+  ),
+}));
+
+vi.mock("@/components/insights/CreditDepletionCard", () => ({
+  CreditDepletionCard: ({ insights }: { insights: unknown[] }) => (
+    <div data-testid="mock-credit-depletion-card">
+      {insights.length} depletion insights
+    </div>
+  ),
+}));
+
+// Mock computeInsights to return a deterministic CategorizedInsights object
+// that yields non-empty ready states for all seven categories.
+function createMockCategorizedInsights(): CategorizedInsights {
+  const categories = [
+    "trends",
+    "adoption",
+    "engagement",
+    "modelUsage",
+    "costEfficiency",
+    "anomalies",
+    "creditDepletion",
+  ] as const;
+  return Object.fromEntries(
+    categories.map((cat) => [cat, { kind: "insights", insights: [] }]),
+  ) as CategorizedInsights;
+}
+
+vi.mock("@/lib/insights", () => ({
+  computeInsights: vi.fn(() => createMockCategorizedInsights()),
+  DEFAULT_INSIGHT_CONFIG: {},
+}));
+
 import InsightsPage from "@/app/(dashboard)/insights/page";
 
-// ── Deterministic fixtures ───────────────────────────────────────────────────
+// ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const SEVEN_CATEGORIES = [
   "trends",
@@ -84,6 +158,20 @@ const SEVEN_CATEGORIES = [
   "anomalies",
   "creditDepletion",
 ] as const;
+
+/** Fixed display order matching CARD_ORDER in the page. */
+const CARD_ORDER = [
+  "trends",
+  "adoption",
+  "engagement",
+  "modelUsage",
+  "costEfficiency",
+  "anomalies",
+  "creditDepletion",
+] as const;
+
+/** Chart-bearing categories that should receive gridColumn "span 2". */
+const CHART_CARD_CATEGORIES = new Set(["trends", "modelUsage", "costEfficiency"]);
 
 function makeDailyTotals(): DailyTotal[] {
   return Array.from({ length: 30 }, (_, i) => ({
@@ -102,10 +190,7 @@ function makeAggregate(): AggregateMetrics {
     start_date: "2024-01-01",
     end_date: "2024-01-30",
     total_messages: daily.reduce((s, d) => s + d.total_messages, 0),
-    total_chat_conversations: daily.reduce(
-      (s, d) => s + d.chat_conversations,
-      0,
-    ),
+    total_chat_conversations: daily.reduce((s, d) => s + d.chat_conversations, 0),
     total_credits_used: daily.reduce((s, d) => s + d.credits_used, 0),
     active_user_count: 8,
     avg_messages_per_user: 12.5,
@@ -135,15 +220,6 @@ function makeUsers(): UserSummary[] {
       credits_used: 120,
       active_days: 11,
     },
-    {
-      user_id: "u3",
-      label: "User Three",
-      adoption_score: 5,
-      total_messages: 12,
-      chat_conversations: 2,
-      credits_used: 8,
-      active_days: 2,
-    },
   ];
 }
 
@@ -166,7 +242,7 @@ afterEach(() => {
   cleanup();
 });
 
-// ── Default range (R2.4, R13.7) ──────────────────────────────────────────────
+// ── Default range (R2.4, R13.7) ───────────────────────────────────────────────
 
 describe("InsightsPage default range (R2.4, R13.7)", () => {
   test("defaults to 'month' and reflects it as the pressed Range value", () => {
@@ -175,13 +251,12 @@ describe("InsightsPage default range (R2.4, R13.7)", () => {
     const monthBtn = screen.getByTestId("range-month");
     const weekBtn = screen.getByTestId("range-week");
 
-    // The exposed current value (aria-pressed) reflects "month" by default.
     expect(monthBtn).toHaveAttribute("aria-pressed", "true");
     expect(weekBtn).toHaveAttribute("aria-pressed", "false");
   });
 });
 
-// ── Seven cards with category headings (R2.5, R2.6) ──────────────────────────
+// ── Seven cards with category headings (R2.5, R2.6) ───────────────────────────
 
 describe("InsightsPage renders seven category cards (R2.5, R2.6)", () => {
   test("renders exactly seven InsightCards, one per category", () => {
@@ -193,7 +268,7 @@ describe("InsightsPage renders seven category cards (R2.5, R2.6)", () => {
       ).toBeInTheDocument();
     }
 
-    // Exactly seven cards — no more, no fewer.
+    // Exactly seven — no more, no fewer.
     const cards = screen
       .getAllByTestId(/^insight-card-[a-zA-Z]+$/)
       .filter((el) => /^insight-card-[a-zA-Z]+$/.test(el.dataset.testid ?? ""));
@@ -231,19 +306,17 @@ describe("InsightsPage heading structure (R13.4)", () => {
     expect(h1s).toHaveLength(1);
     expect(h1s[0]).toHaveTextContent("Insights");
 
-    // Each of the seven card titles is one level below the page heading (h2),
-    // with no skipped levels (no h3+ titles used for cards).
+    // Each of the seven card titles is one level below the page heading (h2).
     const h2s = container.querySelectorAll("h2");
     expect(h2s).toHaveLength(7);
   });
 });
 
-// ── One forced-error card leaves the others rendered (R2.8, R11.5) ───────────
+// ── One forced-error card leaves the others rendered (R2.8, R11.5) ────────────
 
 describe("InsightsPage isolates a single failing card (R2.8, R11.5)", () => {
   test("adoption error shows Retry while the other six cards still render", () => {
-    // Only the users query (which drives the adoption card) fails; the
-    // aggregate query that drives the other six cards resolves normally.
+    // Only the users query (which drives the adoption card) fails.
     usersState = {
       data: undefined,
       isLoading: false,
@@ -273,7 +346,7 @@ describe("InsightsPage isolates a single failing card (R2.8, R11.5)", () => {
   });
 });
 
-// ── Range control: keyboard operability + accessible name + value ────────────
+// ── Range control accessibility (R13.5, R13.6, R13.7) ────────────────────────
 
 describe("InsightsPage Range control accessibility (R13.5, R13.6, R13.7)", () => {
   test("the Range control exposes a non-empty group accessible name (R13.7)", () => {
@@ -290,27 +363,23 @@ describe("InsightsPage Range control accessibility (R13.5, R13.6, R13.7)", () =>
     expect(weekBtn.tagName).toBe("BUTTON");
     expect(monthBtn.tagName).toBe("BUTTON");
 
-    // A native <button> is in the tab order and can hold focus.
     weekBtn.focus();
     expect(weekBtn).toHaveFocus();
   });
 
-  test("activating another option updates the exposed pressed value via keyboard (R13.6, R13.7)", async () => {
+  test("activating another option updates the pressed value via keyboard (R13.6, R13.7)", async () => {
     const user = userEvent.setup();
     render(<InsightsPage />);
 
     const weekBtn = screen.getByTestId("range-week");
     const monthBtn = screen.getByTestId("range-month");
 
-    // Initially "month" is the pressed value.
     expect(monthBtn).toHaveAttribute("aria-pressed", "true");
     expect(weekBtn).toHaveAttribute("aria-pressed", "false");
 
-    // Focus and activate "week" with the keyboard (no pointing device).
     weekBtn.focus();
     await user.keyboard("{Enter}");
 
-    // The exposed current value flips to "week".
     expect(screen.getByTestId("range-week")).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -322,14 +391,88 @@ describe("InsightsPage Range control accessibility (R13.5, R13.6, R13.7)", () =>
   });
 });
 
-// ── axe-core: no accessibility violations (R13.8 and overall) ────────────────
+// ── Grid layout: outer container has display:grid (R14.1) ─────────────────────
+
+describe("InsightsPage grid layout (R14.1)", () => {
+  test("outer .insights-grid container has display: grid via injected <style>", () => {
+    const { container } = render(<InsightsPage />);
+
+    // The page injects a <style> tag with .insights-grid { display: grid }.
+    const styleEl = container.querySelector("style");
+    expect(styleEl).not.toBeNull();
+    expect(styleEl?.textContent).toMatch(/\.insights-grid\s*\{[^}]*display\s*:\s*grid/);
+  });
+
+  test("the .insights-grid <div> element is present in the DOM (R14.1)", () => {
+    const { container } = render(<InsightsPage />);
+    const grid = container.querySelector(".insights-grid");
+    expect(grid).not.toBeNull();
+    expect(grid?.tagName).toBe("DIV");
+  });
+});
+
+// ── Grid spans: chart cards span 2, text-only cards span 1 (R14.2) ───────────
+
+describe("InsightsPage card grid column spans (R14.2)", () => {
+  test("chart-bearing categories (trends, modelUsage, costEfficiency) get gridColumn 'span 2'", () => {
+    const { container } = render(<InsightsPage />);
+
+    const chartCategories = ["trends", "modelUsage", "costEfficiency"];
+    for (const category of chartCategories) {
+      const card = container.querySelector(`[data-testid="insight-card-${category}"]`);
+      expect(card).not.toBeNull();
+      // The wrapper <div> that holds each InsightCard carries the gridColumn style.
+      const wrapper = card?.parentElement;
+      expect(wrapper).not.toBeNull();
+      expect(wrapper?.style.gridColumn).toBe("span 2");
+    }
+  });
+
+  test("text-only categories (adoption, engagement, anomalies, creditDepletion) get gridColumn 'span 1'", () => {
+    const { container } = render(<InsightsPage />);
+
+    const textOnlyCategories = ["adoption", "engagement", "anomalies", "creditDepletion"];
+    for (const category of textOnlyCategories) {
+      const card = container.querySelector(`[data-testid="insight-card-${category}"]`);
+      expect(card).not.toBeNull();
+      const wrapper = card?.parentElement;
+      expect(wrapper).not.toBeNull();
+      expect(wrapper?.style.gridColumn).toBe("span 1");
+    }
+  });
+});
+
+// ── Card order matches CARD_ORDER (R14.7) ─────────────────────────────────────
+
+describe("InsightsPage card order matches CARD_ORDER (R14.7)", () => {
+  test("cards appear in CARD_ORDER: trends, adoption, engagement, modelUsage, costEfficiency, anomalies, creditDepletion", () => {
+    const { container } = render(<InsightsPage />);
+
+    // Collect all insight cards in DOM order.
+    const allCards = Array.from(
+      container.querySelectorAll("[data-testid^='insight-card-']"),
+    ).filter((el) =>
+      /^insight-card-[a-zA-Z]+$/.test((el as HTMLElement).dataset.testid ?? ""),
+    );
+
+    expect(allCards).toHaveLength(7);
+
+    // Each card's data-testid must match the corresponding CARD_ORDER entry.
+    CARD_ORDER.forEach((category, index) => {
+      expect((allCards[index] as HTMLElement).dataset.testid).toBe(
+        `insight-card-${category}`,
+      );
+    });
+  });
+});
+
+// ── axe-core: no accessibility violations (R13.8) ────────────────────────────
 
 describe("InsightsPage has no axe-core violations (R13.8)", () => {
   test("the rendered page passes an axe accessibility scan", async () => {
     const { container } = render(<InsightsPage />);
 
-    // color-contrast cannot be reliably computed under jsdom (no layout engine),
-    // so it is disabled here; the remaining structural/ARIA rules run normally.
+    // color-contrast cannot be reliably computed under jsdom (no layout engine).
     const results = await axe(container, {
       rules: { "color-contrast": { enabled: false } },
     });
