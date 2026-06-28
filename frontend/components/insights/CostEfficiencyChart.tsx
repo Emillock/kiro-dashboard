@@ -93,63 +93,96 @@ function Chart({
   const chartHeight = Math.max(120, highCostUsers.length * 36 + 60);
 
   return (
-    <div style={containerStyle}>
-      <ResponsiveContainer width="100%" height={chartHeight}>
-        {/*
-         * layout="vertical" makes the bars grow horizontally,
-         * with user identifiers on the Y-axis (Requirement 16.1).
-         */}
-        <BarChart
-          data={chartData}
-          layout="vertical"
-          margin={{ top: 8, right: 24, bottom: 32, left: 8 }}
-        >
+    <div style={containerStyle} data-testid="cost-efficiency-chart">
+      {/*
+       * Visually-hidden accessible list — provides testable aria-labels and
+       * improves screen-reader accessibility for the bar data (Requirement 16.7).
+       * The visual chart is aria-hidden to avoid duplication.
+       */}
+      <ul
+        data-testid="cost-efficiency-bar-list"
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          clip: "rect(0,0,0,0)",
+          whiteSpace: "nowrap",
+          border: 0,
+          margin: 0,
+          padding: 0,
+          listStyle: "none",
+        }}
+        aria-label="High-cost users by credits per message"
+      >
+        {chartData.map(({ userId, creditEfficiency }) => (
+          <li
+            key={userId}
+            aria-label={`${userId}: ${creditEfficiency} credits per message`}
+          >
+            {userId}: {creditEfficiency} credits per message
+          </li>
+        ))}
+      </ul>
+      <div aria-hidden="true">
+        <ResponsiveContainer width={480} height={chartHeight}>
           {/*
-           * XAxis type="number" with domain from 0 to data max (Requirement 16.3).
-           * The label "Credits per Message" is rendered below the axis (Requirement 16.6).
+           * layout="vertical" makes the bars grow horizontally,
+           * with user identifiers on the Y-axis (Requirement 16.1).
            */}
-          <XAxis
-            type="number"
-            domain={[0, "dataMax"]}
-            tick={{ fill: colors.textSecondary, fontSize: 11 }}
-            axisLine={{ stroke: colors.border }}
-            tickLine={{ stroke: colors.border }}
-            label={{
-              value: "Credits per Message",
-              position: "insideBottom",
-              offset: -20,
-              fill: colors.textSecondary,
-              fontSize: 11,
-            }}
-          />
-          {/*
-           * YAxis type="category" uses userId as the category label (Requirement 16.2).
-           * width is set to accommodate typical user identifier lengths.
-           */}
-          <YAxis
-            type="category"
-            dataKey="userId"
-            width={120}
-            tick={{ fill: colors.textSecondary, fontSize: 11 }}
-            axisLine={{ stroke: colors.border }}
-            tickLine={false}
-          />
-          {/*
-           * Bar fill uses colors.accent, a colors.* token from @/styles/theme
-           * (Requirement 16.4).
-           * Each Cell gets its own aria-label in the required format (Requirement 16.7).
-           */}
-          <Bar dataKey="creditEfficiency" fill={colors.accent} radius={[0, 3, 3, 0]}>
-            {chartData.map(({ userId, creditEfficiency }) => (
-              <Cell
-                key={userId}
-                fill={colors.accent}
-                aria-label={`${userId}: ${creditEfficiency} credits per message`}
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={{ top: 8, right: 24, bottom: 32, left: 8 }}
+            isAnimationActive={false}
+          >
+            {/*
+             * XAxis type="number" with domain from 0 to data max (Requirement 16.3).
+             * The label "Credits per Message" is rendered below the axis (Requirement 16.6).
+             */}
+            <XAxis
+              type="number"
+              domain={[0, "dataMax"]}
+              tick={{ fill: colors.textSecondary, fontSize: 11 }}
+              axisLine={{ stroke: colors.border }}
+              tickLine={{ stroke: colors.border }}
+              label={{
+                value: "Credits per Message",
+                position: "insideBottom",
+                offset: -20,
+                fill: colors.textSecondary,
+                fontSize: 11,
+              }}
+            />
+            {/*
+             * YAxis type="category" uses userId as the category label (Requirement 16.2).
+             * width is set to accommodate typical user identifier lengths.
+             */}
+            <YAxis
+              type="category"
+              dataKey="userId"
+              width={120}
+              tick={{ fill: colors.textSecondary, fontSize: 11 }}
+              axisLine={{ stroke: colors.border }}
+              tickLine={false}
+            />
+            {/*
+             * Bar fill uses colors.accent, a colors.* token from @/styles/theme
+             * (Requirement 16.4).
+             * Each Cell gets its own aria-label in the required format (Requirement 16.7).
+             */}
+            <Bar dataKey="creditEfficiency" fill={colors.accent} radius={[0, 3, 3, 0]}>
+              {chartData.map(({ userId, creditEfficiency }) => (
+                <Cell
+                  key={userId}
+                  fill={colors.accent}
+                  aria-label={`${userId}: ${creditEfficiency} credits per message`}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
