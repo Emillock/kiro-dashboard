@@ -230,6 +230,8 @@ function makeUserMetrics(
       subscription_tier: TIERS[idx % TIERS.length],
       adoption_score: s.adoption_score,
       daily_breakdown: breakdown,
+      overage_cap: 0,
+      overage_credits_used: 0,
     };
   });
 }

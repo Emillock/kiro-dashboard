@@ -76,6 +76,16 @@ function buildSlices(distribution: Record<string, number>): ModelSlice[] {
     }));
 }
 
+/**
+ * Format a raw API model key (e.g. "claude_opus_4.8_messages") into a cleaner
+ * display label ("claude opus 4.8") by stripping the trailing `_messages`
+ * suffix and replacing underscores with spaces. Aria-labels keep the raw
+ * model key (Requirement 18.8); this only affects the visible legend text.
+ */
+function formatModelLabel(model: string): string {
+  return model.replace(/_messages$/, "").replace(/_/g, " ");
+}
+
 interface CustomLegendPayloadEntry {
   value: string;
   color?: string;
@@ -126,7 +136,7 @@ function CustomLegend({
               }}
             />
             <span>
-              {entry.value} &mdash; {sharePct}%
+              {formatModelLabel(entry.value)} &mdash; {sharePct}%
             </span>
           </li>
         );
@@ -150,7 +160,7 @@ function PieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ n
       fontSize: 12,
       color: colors.textPrimary,
     }}>
-      <div style={{ fontWeight: 600 }}>{model}</div>
+      <div style={{ fontWeight: 600 }}>{formatModelLabel(model)}</div>
       <div style={{ color: colors.textSecondary }}>{sharePct}% · {count.toLocaleString()} msgs</div>
     </div>
   );

@@ -29,22 +29,22 @@ insights engine, so the engine marks the dependent insights as `unavailable`.
 
 #### Backend (3 changes)
 
-- [ ] **`backend/core/ingestion/parser.py`** — parse `Overage_Cap` column into a new
+- [x] **`backend/core/ingestion/parser.py`** — parse `Overage_Cap` column into a new
   `overage_cap: float` field on `UsageRecord` (already in `STABLE_CORE_COLUMNS`).
 
-- [ ] **`backend/models/metrics.py`** — add `overage_cap: float = 0.0` and
+- [x] **`backend/models/metrics.py`** — add `overage_cap: float = 0.0` and
   `overage_credits_used: float = 0.0` to `UserMetrics` so the API exposes them.
 
-- [ ] **`backend/core/metrics/aggregator.py`** — propagate `overage_cap` and
+- [x] **`backend/core/metrics/aggregator.py`** — propagate `overage_cap` and
   `overage_credits_used` when building `UserMetrics` in `compute_user_metrics()`
   (take the most-recent non-zero `overage_cap` per user, sum `overage_credits_used`).
 
 #### Frontend (2 changes)
 
-- [ ] **`frontend/lib/api.ts`** — add `overage_cap: number` and
+- [x] **`frontend/lib/api.ts`** — add `overage_cap: number` and
   `overage_credits_used: number` to the `UserMetrics` TypeScript interface.
 
-- [ ] **`frontend/app/(dashboard)/insights/page.tsx`** — build `allowanceByTier` and
+- [x] **`frontend/app/(dashboard)/insights/page.tsx`** — build `allowanceByTier` and
   `overageByUser` maps from the resolved `userMetrics` fan-out and pass them to
   `computeInsights()` instead of `null`, which will unblock all 6 insight computations.
 
@@ -80,40 +80,34 @@ At the `≥ 1200px` breakpoint the grid is `repeat(4, 1fr)`. With the current ca
 
 `CreditDepletion` (span 1) sits alone in the last row, leaving 3 empty columns.
 
-### Fix options
+### Fix applied
 
-- [ ] **Option A — Reorder cards** so text-only cards fill the gaps beside chart cards:
-  ```
-  [Trends   — span 2][Adoption  — span 1][Engagement   — span 1]
-  [ModelUsg — span 2][CostEff   — span 2]
-  [CreditDep — span 4 full-width]
-  ```
+Went with a variant of **Option A**: rather than reordering cards, `CreditDepletion`
+now gets `gridColumn: "1 / -1"` (full width) via a new `FULL_WIDTH_CARD_CATEGORIES`
+set in `frontend/app/(dashboard)/insights/page.tsx`. `1 / -1` spans every column
+regardless of the current breakpoint's column count, so it fills the last row
+completely at 1, 2, and 4 columns without needing per-breakpoint span values or
+reordering the other cards.
 
-- [ ] **Option B — Make Credit Depletion span 2** to fill a half-row instead of
-  leaving 3 empty columns.
+### Files changed
 
-- [ ] **Option C — Add a new text-only card** (e.g. a Summary card showing top-level
-  stats at a glance) so the grid always fills completely.
-
-- [ ] **Option D — Use CSS `grid-auto-flow: dense`** to let the browser pack cards
-  automatically without manual reordering.
-
-### Files to change
-
-- `frontend/app/(dashboard)/insights/page.tsx` — `CARD_ORDER`, `CHART_CARD_CATEGORIES`,
-  and the `<style>` block with the responsive grid breakpoints.
+- `frontend/app/(dashboard)/insights/page.tsx` — added `FULL_WIDTH_CARD_CATEGORIES`
+  and updated the per-card `gridColumn` logic.
 
 ---
 
 ## 3. Minor Polish (lower priority)
 
-- [ ] The Trends card sparklines occupy the full card width but the text insights below
-  them leave a lot of vertical whitespace when there are only 5 insight rows. Consider
-  increasing sparkline height to `120px` or adding a mini summary stat row.
+- [x] The Trends card sparklines occupy the full card width but the text insights below
+  them leave a lot of vertical whitespace when there are only 5 insight rows. Sparkline
+  height increased from `80px` to `120px`.
 
-- [ ] Model Usage donut: the legend text uses raw API key names like
-  `claude_opus_4.8_messages`. Strip the `_messages` suffix for a cleaner display
-  (e.g. show `claude opus 4.8` instead).
+- [x] Model Usage donut: the legend text uses raw API key names like
+  `claude_opus_4.8_messages`. Now stripped of the `_messages` suffix and
+  underscores replaced with spaces (e.g. `claude opus 4.8`) via `formatModelLabel()`
+  in `ModelUsageDonut.tsx`. Aria-labels and Cell labels keep the raw key (Requirement 18.8).
 
-- [ ] Cost & Efficiency bar chart: the Y-axis email labels are truncated at narrow
-  viewport widths. Add `textOverflow: "ellipsis"` or a tooltip on the tick label.
+- [x] Cost & Efficiency bar chart: the Y-axis email labels are truncated at narrow
+  viewport widths. Added a custom `YAxisTick` renderer in `CostEfficiencyChart.tsx`
+  that truncates to 18 chars with an ellipsis and exposes the full label via a
+  native SVG `<title>` tooltip on hover.

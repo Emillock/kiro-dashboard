@@ -122,6 +122,7 @@ def parse_report(csv_text: str) -> list[UsageRecord]:
                 chat_conversations=_to_int(cell(row, "Chat_Conversations")),
                 credits_used=_to_float(cell(row, "Credits_Used")),
                 total_messages=_to_int(cell(row, "Total_Messages")),
+                overage_cap=_to_float(cell(row, "Overage_Cap")),
                 overage_credits_used=_to_float(cell(row, "Overage_Credits_Used")),
                 overage_enabled=_to_bool(cell(row, "Overage_Enabled")),
                 subscription_tier=tier,

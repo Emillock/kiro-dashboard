@@ -76,6 +76,45 @@ export function CostEfficiencyChart({ highCostUsers }: CostEfficiencyChartProps)
   return <Chart highCostUsers={highCostUsers} />;
 }
 
+/** Max characters shown on a Y-axis tick before truncating with an ellipsis. */
+const MAX_TICK_CHARS = 18;
+
+/**
+ * Custom YAxis tick that truncates long email/user labels with an ellipsis at
+ * narrow viewport widths, while exposing the full label via a native SVG
+ * `<title>` tooltip on hover.
+ */
+function YAxisTick({
+  x,
+  y,
+  payload,
+}: {
+  x?: number;
+  y?: number;
+  payload?: { value: string };
+}) {
+  const label = payload?.value ?? "";
+  const truncated =
+    label.length > MAX_TICK_CHARS
+      ? `${label.slice(0, MAX_TICK_CHARS - 1)}…`
+      : label;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={4}
+        textAnchor="end"
+        fill={colors.textSecondary}
+        fontSize={11}
+      >
+        <title>{label}</title>
+        {truncated}
+      </text>
+    </g>
+  );
+}
+
 /**
  * Custom tooltip for the BarChart showing userId and creditEfficiency.
  */
@@ -183,7 +222,7 @@ function Chart({
               type="category"
               dataKey="userId"
               width={160}
-              tick={{ fill: colors.textSecondary, fontSize: 11 }}
+              tick={<YAxisTick />}
               axisLine={{ stroke: colors.border }}
               tickLine={false}
             />

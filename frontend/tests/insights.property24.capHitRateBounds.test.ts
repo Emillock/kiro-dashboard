@@ -100,6 +100,8 @@ function buildUser(
     subscription_tier: tier,
     adoption_score: 0,
     daily_breakdown: daily,
+    overage_cap: 0,
+    overage_credits_used: 0,
   };
 }
 

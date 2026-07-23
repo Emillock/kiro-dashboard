@@ -89,7 +89,7 @@ export function TrendSparklines({ dailyTotals }: TrendSparklinesProps) {
             style={wrapperStyle}
           >
             <span style={labelStyle}>{label}</span>
-            <ResponsiveContainer width="100%" height={80}>
+            <ResponsiveContainer width="100%" height={120}>
               <LineChart data={data} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={colors.border} vertical={false} />
                 <YAxis domain={[0, maxValue > 0 ? maxValue : 1]} hide={true} />

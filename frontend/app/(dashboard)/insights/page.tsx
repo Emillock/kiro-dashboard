@@ -92,6 +92,61 @@ const CHART_CARD_CATEGORIES: Set<InsightCategory> = new Set([
   "costEfficiency",
 ]);
 
+/**
+ * Categories whose cards span the full grid width via `grid-column: 1 / -1`.
+ * Credit Depletion is the lone card in the final row of the default order at
+ * every breakpoint, so making it full-width fills the row instead of leaving
+ * empty trailing columns.
+ */
+const FULL_WIDTH_CARD_CATEGORIES: Set<InsightCategory> = new Set([
+  "creditDepletion",
+]);
+
+/**
+ * Build the per-tier monthly credit Allowance map the credit-depletion engine
+ * needs from the resolved per-user fan-out's `overage_cap` field. A tier's
+ * allowance is taken as the mode (most common non-zero value) of `overage_cap`
+ * across its users, guarding against the odd inconsistent row.
+ */
+function buildAllowanceByTier(
+  userMetrics: UserMetrics[] | null,
+): Record<string, number> | null {
+  if (!userMetrics) return null;
+  const countsByTier = new Map<string, Map<number, number>>();
+  for (const user of userMetrics) {
+    if (!user.subscription_tier || !(user.overage_cap > 0)) continue;
+    const counts = countsByTier.get(user.subscription_tier) ?? new Map();
+    counts.set(user.overage_cap, (counts.get(user.overage_cap) ?? 0) + 1);
+    countsByTier.set(user.subscription_tier, counts);
+  }
+  if (countsByTier.size === 0) return null;
+  const result: Record<string, number> = {};
+  for (const [tier, counts] of countsByTier) {
+    let bestValue = 0;
+    let bestCount = -1;
+    for (const [value, count] of counts) {
+      if (count > bestCount) {
+        bestValue = value;
+        bestCount = count;
+      }
+    }
+    result[tier] = bestValue;
+  }
+  return result;
+}
+
+/** Build the per-user overage-credit-spend map from the resolved fan-out. */
+function buildOverageByUser(
+  userMetrics: UserMetrics[] | null,
+): Record<string, number> | null {
+  if (!userMetrics) return null;
+  const result: Record<string, number> = {};
+  for (const user of userMetrics) {
+    result[user.user_id] = user.overage_credits_used;
+  }
+  return result;
+}
+
 /** Minimal shape of a query the cards depend on for state derivation. */
 interface CardQuery {
   isLoading: boolean;
@@ -164,6 +219,12 @@ export default function InsightsPage() {
   const userMetrics =
     resolvedUserMetrics.length > 0 ? resolvedUserMetrics : null;
 
+  // Build the allowance/overage maps the credit-depletion insights need
+  // straight from the resolved per-user fan-out (Overage_Cap /
+  // Overage_Credits_Used are now surfaced on `UserMetrics`).
+  const allowanceByTier = buildAllowanceByTier(userMetrics);
+  const overageByUser = buildOverageByUser(userMetrics);
+
   // Compute every category from whatever data has resolved (pure, deterministic).
   const categorized = computeInsights(
     {
@@ -171,8 +232,8 @@ export default function InsightsPage() {
       aggregate: aggregateQuery.data ?? null,
       userSummaries: usersQuery.data?.users ?? null,
       userMetrics,
-      allowanceByTier: null,
-      overageByUser: null,
+      allowanceByTier,
+      overageByUser,
     },
     DEFAULT_INSIGHT_CONFIG,
   );
@@ -248,9 +309,11 @@ export default function InsightsPage() {
           <div
             key={category}
             style={{
-              gridColumn: CHART_CARD_CATEGORIES.has(category)
-                ? "span 2"
-                : "span 1",
+              gridColumn: FULL_WIDTH_CARD_CATEGORIES.has(category)
+                ? "1 / -1"
+                : CHART_CARD_CATEGORIES.has(category)
+                  ? "span 2"
+                  : "span 1",
             }}
           >
             <InsightCard
@@ -398,9 +461,9 @@ function CreditDepletionRenderer(insights: Insight[]): React.ReactNode {
         }}>
           <strong style={{ color: colors.textPrimary }}>Why are some insights unavailable?</strong>
           <p style={{ margin: "4px 0 0" }}>
-            Credits remaining, burn-rate projections, early-burner detection, and underutilizer analysis
-            require per-tier credit allowance and overage data. These fields are not yet exposed by the backend API.
-            The insights that can be computed from available data are shown below.
+            The depletion-timing trend requires at least two consecutive months of data, and only
+            one range is stored at a time. The insights that can be computed from available data are
+            shown below.
           </p>
         </div>
       )}

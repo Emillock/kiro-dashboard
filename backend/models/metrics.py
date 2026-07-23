@@ -35,6 +35,7 @@ class UsageRecord(BaseModel):
     chat_conversations: int = 0
     credits_used: float = 0.0
     total_messages: int = 0
+    overage_cap: float = 0.0
     overage_credits_used: float = 0.0
     overage_enabled: bool = False
     subscription_tier: str | None = None
@@ -68,6 +69,8 @@ class UserMetrics(BaseModel):
     subscription_tier: str | None = None
     adoption_score: float = 0.0
     daily_breakdown: list[DailyTotal] = Field(default_factory=list)
+    overage_cap: float = 0.0
+    overage_credits_used: float = 0.0
 
 
 class UserSummary(BaseModel):

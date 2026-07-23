@@ -44,6 +44,14 @@ def compute_user_metrics(
         total_messages = sum(r.total_messages for r in user_records)
         chat_conversations = sum(r.chat_conversations for r in user_records)
         credits_used = sum(r.credits_used for r in user_records)
+        overage_credits_used = sum(r.overage_credits_used for r in user_records)
+
+        # Overage cap (credit allowance): take the most-recent non-zero value.
+        overage_cap = 0.0
+        for r in sorted(user_records, key=lambda x: x.date, reverse=True):
+            if r.overage_cap:
+                overage_cap = r.overage_cap
+                break
 
         # Active days: distinct dates with activity.
         active_dates = {r.date for r in user_records if _is_active(r)}
@@ -93,6 +101,8 @@ def compute_user_metrics(
                 subscription_tier=tier,
                 adoption_score=0.0,  # filled by adoption.apply_scores
                 daily_breakdown=daily_breakdown,
+                overage_cap=overage_cap,
+                overage_credits_used=round(overage_credits_used, 6),
             )
         )
 

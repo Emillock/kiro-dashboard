@@ -132,6 +132,8 @@ function buildUser(id: string, counts: number[]): UserMetrics {
     subscription_tier: null,
     adoption_score: 0,
     daily_breakdown: [],
+    overage_cap: 0,
+    overage_credits_used: 0,
   };
 }
 

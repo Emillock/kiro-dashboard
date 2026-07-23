@@ -73,6 +73,8 @@ function userWith(userId: string, breakdownDates: string[]): UserMetrics {
     subscription_tier: "pro",
     adoption_score: 0,
     daily_breakdown: breakdownDates.map(day),
+    overage_cap: 0,
+    overage_credits_used: 0,
   };
 }
 
