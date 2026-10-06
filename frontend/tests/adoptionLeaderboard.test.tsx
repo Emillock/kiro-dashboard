@@ -228,15 +228,15 @@ describe("AdoptionLeaderboard direction indicators", () => {
   test("↑ character with aria-label 'up N positions' for positive Rank_Delta (R15.3, R15.8)", () => {
     renderWithDeltas();
     const delta = screen.getByTestId("leaderboard-delta-user-up");
-    expect(delta.textContent).toBe("↑");
-    expect(delta).toHaveAttribute("aria-label", "up 2 positions");
+    expect(delta.textContent).toMatch(/^↑ #\d+$/);
+    expect(delta).toHaveAttribute("aria-label", expect.stringMatching(/^up 2 positions from rank \d+$/));
   });
 
   test("↓ character with aria-label 'down N positions' for negative Rank_Delta (R15.4, R15.8)", () => {
     renderWithDeltas();
     const delta = screen.getByTestId("leaderboard-delta-user-down");
-    expect(delta.textContent).toBe("↓");
-    expect(delta).toHaveAttribute("aria-label", "down 1 positions");
+    expect(delta.textContent).toMatch(/^↓ #\d+$/);
+    expect(delta).toHaveAttribute("aria-label", expect.stringMatching(/^down 1 positions from rank \d+$/));
   });
 
   test("– character with aria-label 'no change' for Rank_Delta === 0 (R15.5, R15.8)", () => {
@@ -249,7 +249,7 @@ describe("AdoptionLeaderboard direction indicators", () => {
   test("– character with aria-label 'new entry' for new entrants (R15.6, R15.8)", () => {
     renderWithDeltas();
     const delta = screen.getByTestId("leaderboard-delta-new-entry");
-    expect(delta.textContent).toBe("–");
+    expect(delta.textContent).toBe("new");
     expect(delta).toHaveAttribute("aria-label", "new entry");
   });
 });
@@ -383,15 +383,15 @@ describe("Property 31: Delta indicator direction matches Rank_Delta sign", () =>
         );
 
         for (const mover of allMovers) {
-          const deltaEl = screen.queryByTestId(`leaderboard-delta-${mover.userId}`);
+          const deltaEl = screen.queryAllByTestId(`leaderboard-delta-${mover.userId}`)[0];
           if (!deltaEl) continue;
 
           if (mover.rankDelta > 0) {
-            expect(deltaEl.textContent).toBe("↑");
-            expect(deltaEl.getAttribute("aria-label")).toMatch(/^up \d+ positions$/);
+            expect(deltaEl.textContent).toMatch(/^↑ #\d+$/);
+            expect(deltaEl.getAttribute("aria-label")).toMatch(/^up \d+ positions from rank \d+$/);
           } else if (mover.rankDelta < 0) {
-            expect(deltaEl.textContent).toBe("↓");
-            expect(deltaEl.getAttribute("aria-label")).toMatch(/^down \d+ positions$/);
+            expect(deltaEl.textContent).toMatch(/^↓ #\d+$/);
+            expect(deltaEl.getAttribute("aria-label")).toMatch(/^down \d+ positions from rank \d+$/);
           } else {
             // Should not happen (filtered above), but be defensive
             expect(deltaEl.textContent).toBe("–");

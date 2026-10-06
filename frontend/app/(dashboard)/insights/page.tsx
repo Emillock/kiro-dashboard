@@ -290,49 +290,92 @@ export default function InsightsPage() {
       <style>{`
         .insights-grid {
           display: grid;
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
           gap: 12px;
+          align-items: start;
+          grid-auto-flow: row dense;
+        }
+        .insights-grid > * { min-width: 0; }
+        .insights-side-col { display: grid; gap: 12px; align-items: start; grid-template-columns: minmax(0, 1fr); }
+        @media (min-width: 768px) and (max-width: 1199px) {
+          .insights-side-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (min-width: 768px) {
-          .insights-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+          .insights-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .insights-span-2 { grid-column: span 2; }
+          .insights-span-all { grid-column: 1 / -1; }
         }
         @media (min-width: 1200px) {
-          .insights-grid {
-            grid-template-columns: repeat(4, 1fr);
-          }
+          .insights-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+        @media (max-width: 767px) {
+          main[role="main"] { padding: 64px 16px 24px !important; }
         }
       `}</style>
       <div className="insights-grid">
-        {CARD_ORDER.map(({ category, title }) => (
-          <div
-            key={category}
-            style={{
-              gridColumn: FULL_WIDTH_CARD_CATEGORIES.has(category)
-                ? "1 / -1"
-                : CHART_CARD_CATEGORIES.has(category)
-                  ? "span 2"
-                  : "span 1",
-            }}
-          >
-            <InsightCard
-              category={category}
-              title={title}
-              state={deriveCardState(
-                queryForCategory(category),
-                categorized[category],
-              )}
-              renderReady={buildRenderReady(
-                category,
-                aggregateQuery.data?.daily_totals ?? [],
-                aggregateQuery.data?.model_distribution ?? {},
-                usersQuery.data?.users ?? [],
-                range,
-              )}
-            />
-          </div>
-        ))}
+        {CARD_ORDER.map(({ category, title }) => {
+          const card = (
+            <div
+              key={category}
+              className={
+                FULL_WIDTH_CARD_CATEGORIES.has(category)
+                  ? "insights-span-all"
+                  : category === "trends"
+                    ? "insights-span-2"
+                    : category === "adoption" || category === "engagement"
+                      ? "insights-side"
+                      : CHART_CARD_CATEGORIES.has(category)
+                        ? "insights-span-2"
+                        : undefined
+              }
+            >
+              <InsightCard
+                category={category}
+                title={title}
+                state={deriveCardState(
+                  queryForCategory(category),
+                  categorized[category],
+                )}
+                renderReady={buildRenderReady(
+                  category,
+                  aggregateQuery.data?.daily_totals ?? [],
+                  aggregateQuery.data?.model_distribution ?? {},
+                  usersQuery.data?.users ?? [],
+                  range,
+                )}
+              />
+            </div>
+          );
+          if (category === "adoption") return null;
+          if (category === "engagement") {
+            return (
+              <div key="side-col" className="insights-span-2 insights-side-col">
+                {CARD_ORDER.filter(
+                  (c) => c.category === "adoption" || c.category === "engagement",
+                ).map((c) => (
+                  <div key={c.category} className="insights-side">
+                    <InsightCard
+                      category={c.category}
+                      title={c.title}
+                      state={deriveCardState(
+                        queryForCategory(c.category),
+                        categorized[c.category],
+                      )}
+                      renderReady={buildRenderReady(
+                        c.category,
+                        aggregateQuery.data?.daily_totals ?? [],
+                        aggregateQuery.data?.model_distribution ?? {},
+                        usersQuery.data?.users ?? [],
+                        range,
+                      )}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          }
+          return card;
+        })}
       </div>
     </div>
   );

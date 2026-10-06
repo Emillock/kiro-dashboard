@@ -54,7 +54,7 @@ const labelStyle: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-function CustomTooltip({ active, payload, label: _label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
+function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ value: number }> }) {
   if (!active || !payload || payload.length === 0) return null;
   return (
     <div style={{

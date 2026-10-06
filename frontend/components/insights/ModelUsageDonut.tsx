@@ -175,6 +175,7 @@ function PieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ n
  * Recharts centers PieChart at (cx, cy) of the ResponsiveContainer. We use
  * an absolute overlay to avoid coupling to internal Recharts state.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- retained overlay, currently not rendered
 function DonutCenterLabel({
   model,
   sharePct,

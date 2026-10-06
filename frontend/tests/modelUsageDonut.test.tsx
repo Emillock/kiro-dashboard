@@ -458,6 +458,7 @@ describe("Property 37: PieChart and Cell aria-labels follow the specified format
           <ModelUsageDonut modelDistribution={dist} />,
         );
 
+        try {
         // 1. Verify PieChart container aria-label format
         const piechart = screen.queryByTestId("model-usage-piechart");
         expect(piechart).not.toBeNull();
@@ -486,8 +487,9 @@ describe("Property 37: PieChart and Cell aria-labels follow the specified format
           );
           expect(cellEl).not.toBeNull();
         }
-
-        unmount();
+        } finally {
+          unmount();
+        }
       }),
       { numRuns: RUNS },
     );

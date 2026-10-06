@@ -155,7 +155,7 @@ function ProgressBarRow({ insight, percentConsumed }: { insight: Insight; percen
 
   const containerStyle: CSSProperties = {
     ...rowBaseStyle,
-    ...(isUnavailable ? { opacity: 0.5, color: colors.textMuted } : {}),
+    ...(isUnavailable ? { opacity: 0.8, color: colors.textMuted } : {}),
   };
 
   return (
@@ -179,7 +179,7 @@ function ProgressBarRow({ insight, percentConsumed }: { insight: Insight; percen
       </p>
 
       {/* Unavailable reason (R20.4) — rendered when present */}
-      {isUnavailable && insight.unavailableReason && (
+      {isUnavailable && insight.unavailableReason && !insight.description.includes(insight.unavailableReason) && (
         <p
           data-testid={`credit-depletion-unavailable-reason-${insight.id}`}
           style={unavailableReasonStyle}
@@ -203,7 +203,7 @@ function PlainTextRow({ insight }: { insight: Insight }) {
 
   const containerStyle: CSSProperties = {
     ...rowBaseStyle,
-    ...(isUnavailable ? { opacity: 0.5, color: colors.textMuted } : {}),
+    ...(isUnavailable ? { opacity: 0.8, color: colors.textMuted } : {}),
   };
 
   return (
@@ -223,7 +223,7 @@ function PlainTextRow({ insight }: { insight: Insight }) {
       </p>
 
       {/* Unavailable reason (R20.4) — rendered when present */}
-      {isUnavailable && insight.unavailableReason && (
+      {isUnavailable && insight.unavailableReason && !insight.description.includes(insight.unavailableReason) && (
         <p
           data-testid={`credit-depletion-unavailable-reason-${insight.id}`}
           style={unavailableReasonStyle}

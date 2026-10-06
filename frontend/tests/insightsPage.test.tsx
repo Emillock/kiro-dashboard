@@ -6,7 +6,7 @@
  * Validates: Requirements 2.4, 2.5, 2.6, 13.4, 13.5, 13.6, 13.7, 13.8,
  *            14.1, 14.2, 14.7
  *  - 2.4  Range defaults to "month"; all cards re-render on range change.
- *  - 2.5  Exactly seven category Insight_Cards render.
+ *  - 2.5  Exactly six category Insight_Cards render.
  *  - 2.6  Each card displays a visible heading containing the category name.
  *  - 13.4 Exactly one <h1> page heading; each card title is an <h2>.
  *  - 13.5 The Range control buttons are real <button>s, keyboard-focusable.
@@ -124,7 +124,7 @@ vi.mock("@/components/insights/CreditDepletionCard", () => ({
 }));
 
 // Mock computeInsights to return a deterministic CategorizedInsights object
-// that yields non-empty ready states for all seven categories.
+// that yields non-empty ready states for all six categories.
 function createMockCategorizedInsights(): CategorizedInsights {
   const categories = [
     "trends",
@@ -132,7 +132,6 @@ function createMockCategorizedInsights(): CategorizedInsights {
     "engagement",
     "modelUsage",
     "costEfficiency",
-    "anomalies",
     "creditDepletion",
   ] as const;
   return Object.fromEntries(
@@ -149,13 +148,12 @@ import InsightsPage from "@/app/(dashboard)/insights/page";
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
-const SEVEN_CATEGORIES = [
+const SIX_CATEGORIES = [
   "trends",
   "adoption",
   "engagement",
   "modelUsage",
   "costEfficiency",
-  "anomalies",
   "creditDepletion",
 ] as const;
 
@@ -166,7 +164,6 @@ const CARD_ORDER = [
   "engagement",
   "modelUsage",
   "costEfficiency",
-  "anomalies",
   "creditDepletion",
 ] as const;
 
@@ -257,23 +254,23 @@ describe("InsightsPage default range (R2.4, R13.7)", () => {
   });
 });
 
-// ── Seven cards with category headings (R2.5, R2.6) ───────────────────────────
+// ── Six cards with category headings (R2.5, R2.6) ───────────────────────────
 
-describe("InsightsPage renders seven category cards (R2.5, R2.6)", () => {
-  test("renders exactly seven InsightCards, one per category", () => {
+describe("InsightsPage renders six category cards (R2.5, R2.6)", () => {
+  test("renders exactly six InsightCards, one per category", () => {
     render(<InsightsPage />);
 
-    for (const category of SEVEN_CATEGORIES) {
+    for (const category of SIX_CATEGORIES) {
       expect(
         screen.getByTestId(`insight-card-${category}`),
       ).toBeInTheDocument();
     }
 
-    // Exactly seven — no more, no fewer.
+    // Exactly six — no more, no fewer.
     const cards = screen
       .getAllByTestId(/^insight-card-[a-zA-Z]+$/)
       .filter((el) => /^insight-card-[a-zA-Z]+$/.test(el.dataset.testid ?? ""));
-    expect(cards).toHaveLength(7);
+    expect(cards).toHaveLength(6);
   });
 
   test("each card shows a visible <h2> heading naming its category (R2.6)", () => {
@@ -285,7 +282,6 @@ describe("InsightsPage renders seven category cards (R2.5, R2.6)", () => {
       "Engagement",
       "Model Usage",
       "Cost & Efficiency",
-      "Anomalies",
       "Credit Depletion",
     ];
 
@@ -300,16 +296,16 @@ describe("InsightsPage renders seven category cards (R2.5, R2.6)", () => {
 // ── Heading structure (R13.4) ─────────────────────────────────────────────────
 
 describe("InsightsPage heading structure (R13.4)", () => {
-  test("renders exactly one <h1> 'Insights' and seven <h2> card titles", () => {
+  test("renders exactly one <h1> 'Insights' and six <h2> card titles", () => {
     const { container } = render(<InsightsPage />);
 
     const h1s = container.querySelectorAll("h1");
     expect(h1s).toHaveLength(1);
     expect(h1s[0]).toHaveTextContent("Insights");
 
-    // Each of the seven card titles is one level below the page heading (h2).
+    // Each of the six card titles is one level below the page heading (h2).
     const h2s = container.querySelectorAll("h2");
-    expect(h2s).toHaveLength(7);
+    expect(h2s).toHaveLength(6);
   });
 });
 
@@ -335,7 +331,7 @@ describe("InsightsPage isolates a single failing card (R2.8, R11.5)", () => {
     expect(within(adoptionCard).getByRole("alert")).toBeInTheDocument();
 
     // The other six cards still render and are NOT in an error state.
-    for (const category of SEVEN_CATEGORIES) {
+    for (const category of SIX_CATEGORIES) {
       if (category === "adoption") continue;
       expect(
         screen.getByTestId(`insight-card-${category}`),
@@ -425,20 +421,22 @@ describe("InsightsPage card grid column spans (R14.2)", () => {
       // The wrapper <div> that holds each InsightCard carries the gridColumn style.
       const wrapper = card?.parentElement;
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.style.gridColumn).toBe("span 2");
+      expect(wrapper?.className).toContain("insights-span-2");
     }
   });
 
-  test("text-only categories (adoption, engagement, anomalies, creditDepletion) get gridColumn 'span 1'", () => {
+  test("text-only categories (adoption, engagement) are side cards; creditDepletion is full width", () => {
     const { container } = render(<InsightsPage />);
 
-    const textOnlyCategories = ["adoption", "engagement", "anomalies", "creditDepletion"];
+    const textOnlyCategories = ["adoption", "engagement", "creditDepletion"];
     for (const category of textOnlyCategories) {
       const card = container.querySelector(`[data-testid="insight-card-${category}"]`);
       expect(card).not.toBeNull();
       const wrapper = card?.parentElement;
       expect(wrapper).not.toBeNull();
-      expect(wrapper?.style.gridColumn).toBe("span 1");
+      expect(wrapper?.className).toContain(
+        category === "creditDepletion" ? "insights-span-all" : "insights-side",
+      );
     }
   });
 });
@@ -446,7 +444,7 @@ describe("InsightsPage card grid column spans (R14.2)", () => {
 // ── Card order matches CARD_ORDER (R14.7) ─────────────────────────────────────
 
 describe("InsightsPage card order matches CARD_ORDER (R14.7)", () => {
-  test("cards appear in CARD_ORDER: trends, adoption, engagement, modelUsage, costEfficiency, anomalies, creditDepletion", () => {
+  test("cards appear in CARD_ORDER: trends, adoption, engagement, modelUsage, costEfficiency, creditDepletion", () => {
     const { container } = render(<InsightsPage />);
 
     // Collect all insight cards in DOM order.
@@ -456,7 +454,7 @@ describe("InsightsPage card order matches CARD_ORDER (R14.7)", () => {
       /^insight-card-[a-zA-Z]+$/.test((el as HTMLElement).dataset.testid ?? ""),
     );
 
-    expect(allCards).toHaveLength(7);
+    expect(allCards).toHaveLength(6);
 
     // Each card's data-testid must match the corresponding CARD_ORDER entry.
     CARD_ORDER.forEach((category, index) => {

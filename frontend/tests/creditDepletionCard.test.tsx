@@ -242,39 +242,39 @@ describe("CreditDepletionCard fill width clamping", () => {
 // ── Unavailable insights: opacity and textMuted (R20.3) ──────────────────────
 
 describe("CreditDepletionCard unavailable insights (R20.3)", () => {
-  test("row container has opacity: 0.5 when status is unavailable (balance insight)", () => {
+  test("row container has opacity: 0.8 when status is unavailable (balance insight)", () => {
     render(
       <CreditDepletionCard
         insights={[makeBalanceInsight("ins-1", 60, "unavailable")]}
       />,
     );
     const row = screen.getByTestId("credit-depletion-row-ins-1");
-    expect(row.style.opacity).toBe("0.5");
+    expect(row.style.opacity).toBe("0.8");
   });
 
-  test("row container has opacity: 0.5 when status is unavailable (plain text insight)", () => {
+  test("row container has opacity: 0.8 when status is unavailable (plain text insight)", () => {
     render(
       <CreditDepletionCard
         insights={[makeInsight("ins-1", "unavailable")]}
       />,
     );
     const row = screen.getByTestId("credit-depletion-row-ins-1");
-    expect(row.style.opacity).toBe("0.5");
+    expect(row.style.opacity).toBe("0.8");
   });
 
-  test("row container does NOT have opacity: 0.5 when status is ok", () => {
+  test("row container does NOT have opacity: 0.8 when status is ok", () => {
     render(<CreditDepletionCard insights={[makeInsight("ins-1", "ok")]} />);
     const row = screen.getByTestId("credit-depletion-row-ins-1");
     // opacity should be empty string or not 0.5
-    expect(row.style.opacity).not.toBe("0.5");
+    expect(row.style.opacity).not.toBe("0.8");
   });
 
-  test("row container does NOT have opacity: 0.5 when status is insufficient_data", () => {
+  test("row container does NOT have opacity: 0.8 when status is insufficient_data", () => {
     render(
       <CreditDepletionCard insights={[makeInsight("ins-1", "insufficient_data")]} />,
     );
     const row = screen.getByTestId("credit-depletion-row-ins-1");
-    expect(row.style.opacity).not.toBe("0.5");
+    expect(row.style.opacity).not.toBe("0.8");
   });
 });
 
