@@ -9,7 +9,6 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useState,
 } from "react";
 
@@ -29,18 +28,18 @@ const AuthContext = createContext<AuthContextValue>({
   isAuthenticated: false,
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+/** Read the stored token at initialisation time (client only, safe on server). */
+function readStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
 
-  // Hydrate from localStorage on mount (client only).
-  useEffect(() => {
-    const stored = typeof window !== "undefined"
-      ? localStorage.getItem(TOKEN_KEY)
-      : null;
-    if (stored) setToken(stored);
-    setHydrated(true);
-  }, []);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Lazy initialisers run only on the client so localStorage access is safe.
+  const [token, setToken] = useState<string | null>(readStoredToken);
+  // hydrated is always true after the first render because the lazy initialiser
+  // already ran synchronously — no effect needed.
+  const [hydrated] = useState(true);
 
   const login = useCallback((newToken: string) => {
     setToken(newToken);

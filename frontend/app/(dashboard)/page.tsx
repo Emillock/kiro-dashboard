@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   loadLayout,
   saveLayout,
   reorderBlocks,
   toggleLock,
-  DEFAULT_BLOCKS,
 } from "@/lib/layout";
 import type { BlockState } from "@/lib/layout";
 import type { RangeParam } from "@/lib/api";
@@ -32,12 +31,7 @@ const BLOCK_TITLES: Record<string, string> = {
 
 export default function DashboardPage() {
   const [range, setRange] = useState<RangeParam>("month");
-  const [blocks, setBlocks] = useState<BlockState[]>(DEFAULT_BLOCKS);
-
-  // Hydrate layout from localStorage on mount.
-  useEffect(() => {
-    setBlocks(loadLayout());
-  }, []);
+  const [blocks, setBlocks] = useState<BlockState[]>(loadLayout);
 
   const { data: aggregateData, isLoading: aggLoading, error: aggError } = useAggregateMetrics(range);
   const { data: topData } = useTopAdopters(range, 5);

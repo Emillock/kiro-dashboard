@@ -41,6 +41,8 @@ export interface UserMetrics {
   subscription_tier: string | null;
   adoption_score: number;
   daily_breakdown: DailyTotal[];
+  overage_cap: number;
+  overage_credits_used: number;
 }
 
 export interface UserSummary {
